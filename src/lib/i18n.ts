@@ -171,7 +171,8 @@ const dictionaries = {
         successDesc: "빠르게 확인 후 회신드리겠습니다. 감사합니다.",
         errorTitle: "전송에 실패했습니다",
         errorDesc: "잠시 후 다시 시도하시거나 이메일로 연락 주세요.",
-        required: "필수 항목을 입력해주세요.",
+        required: "필수 항목입니다.",
+        invalidEmail: "올바른 이메일 형식이 아닙니다.",
       },
     },
     footer: {
@@ -343,7 +344,8 @@ const dictionaries = {
         successDesc: "We'll review it and get back to you shortly. Thank you.",
         errorTitle: "Failed to send",
         errorDesc: "Please try again in a moment, or email us directly.",
-        required: "Please fill in the required fields.",
+        required: "This field is required.",
+        invalidEmail: "Please enter a valid email address.",
       },
     },
     footer: {

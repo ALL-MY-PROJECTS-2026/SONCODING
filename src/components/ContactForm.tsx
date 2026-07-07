@@ -6,28 +6,61 @@ import { site } from "@/config/site";
 import type { Dictionary } from "@/lib/i18n";
 
 type Status = "idle" | "submitting" | "success" | "error";
+type Errors = Record<string, string>;
+
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const REQUIRED = ["name", "email", "message"];
 
 export function ContactForm({ form }: { form: Dictionary["contact"]["form"] }) {
   const [status, setStatus] = useState<Status>("idle");
+  const [errors, setErrors] = useState<Errors>({});
+
+  const validate = (name: string, value: string): string => {
+    const v = value.trim();
+    if (REQUIRED.includes(name) && !v) return form.required;
+    if (name === "email" && v && !emailPattern.test(v)) return form.invalidEmail;
+    return "";
+  };
+
+  const onBlur = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const msg = validate(e.target.name, e.target.value);
+    setErrors((prev) => ({ ...prev, [e.target.name]: msg }));
+  };
+
+  const onChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    // Clear an existing error as soon as the field becomes valid.
+    if (errors[e.target.name]) {
+      setErrors((prev) => ({ ...prev, [e.target.name]: validate(e.target.name, e.target.value) }));
+    }
+  };
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    // Capture the form node now — React nulls e.currentTarget after the await.
     const formEl = e.currentTarget;
-    setStatus("submitting");
     const data = Object.fromEntries(new FormData(formEl).entries());
+
+    // Inline validation before sending.
+    const next: Errors = {};
+    for (const name of REQUIRED) {
+      next[name] = validate(name, String(data[name] ?? ""));
+    }
+    if (Object.values(next).some(Boolean)) {
+      setErrors(next);
+      const first = REQUIRED.find((n) => next[n]);
+      if (first) formEl.querySelector<HTMLElement>(`[name="${first}"]`)?.focus();
+      return;
+    }
+
+    setStatus("submitting");
     try {
-      // Posts straight to Formspree — works on static hosting like GitHub Pages.
       const res = await fetch(site.formspreeEndpoint, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
         body: JSON.stringify(data),
       });
       if (!res.ok) throw new Error("request failed");
       formEl.reset();
+      setErrors({});
       setStatus("success");
     } catch {
       setStatus("error");
@@ -40,9 +73,7 @@ export function ContactForm({ form }: { form: Dictionary["contact"]["form"] }) {
         <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-green-600 text-white">
           <CheckCircle2 className="h-7 w-7" />
         </div>
-        <h3 className="mt-4 text-lg font-bold text-green-900">
-          {form.successTitle}
-        </h3>
+        <h3 className="mt-4 text-lg font-bold text-green-900">{form.successTitle}</h3>
         <p className="mt-2 text-green-700">{form.successDesc}</p>
         <button
           type="button"
@@ -55,30 +86,44 @@ export function ContactForm({ form }: { form: Dictionary["contact"]["form"] }) {
     );
   }
 
-  const fieldClass =
-    "mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-slate-900 outline-none transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-100";
   const labelClass = "block text-sm font-medium text-slate-700";
+  const inputCls = (name: string) =>
+    `mt-1.5 w-full rounded-lg border bg-white px-3.5 py-2.5 text-slate-900 outline-none transition-colors focus:ring-2 ${
+      errors[name]
+        ? "border-red-400 focus:border-red-500 focus:ring-red-100"
+        : "border-slate-300 focus:border-blue-500 focus:ring-blue-100"
+    }`;
+
+  const FieldError = ({ name }: { name: string }) =>
+    errors[name] ? (
+      <p id={`${name}-error`} className="mt-1.5 text-sm text-red-600">
+        {errors[name]}
+      </p>
+    ) : null;
+
+  const a11y = (name: string) => ({
+    onBlur,
+    onChange,
+    "aria-invalid": errors[name] ? true : undefined,
+    "aria-describedby": errors[name] ? `${name}-error` : undefined,
+  });
 
   return (
-    <form onSubmit={onSubmit} className="space-y-5">
+    <form onSubmit={onSubmit} noValidate className="space-y-5">
       <div className="grid gap-5 sm:grid-cols-2">
         <div>
           <label htmlFor="name" className={labelClass}>
             {form.name} <span className="text-blue-600">*</span>
           </label>
-          <input id="name" name="name" required className={fieldClass} />
+          <input id="name" name="name" className={inputCls("name")} {...a11y("name")} />
+          <FieldError name="name" />
         </div>
         <div>
           <label htmlFor="email" className={labelClass}>
             {form.email} <span className="text-blue-600">*</span>
           </label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            required
-            className={fieldClass}
-          />
+          <input id="email" name="email" type="email" className={inputCls("email")} {...a11y("email")} />
+          <FieldError name="email" />
         </div>
       </div>
 
@@ -87,13 +132,13 @@ export function ContactForm({ form }: { form: Dictionary["contact"]["form"] }) {
           <label htmlFor="phone" className={labelClass}>
             {form.phone}
           </label>
-          <input id="phone" name="phone" className={fieldClass} />
+          <input id="phone" name="phone" className={inputCls("phone")} />
         </div>
         <div>
           <label htmlFor="type" className={labelClass}>
             {form.type}
           </label>
-          <select id="type" name="type" className={fieldClass} defaultValue={form.typeOptions[0]}>
+          <select id="type" name="type" className={inputCls("type")} defaultValue={form.typeOptions[0]}>
             {form.typeOptions.map((opt) => (
               <option key={opt} value={opt}>
                 {opt}
@@ -110,11 +155,12 @@ export function ContactForm({ form }: { form: Dictionary["contact"]["form"] }) {
         <textarea
           id="message"
           name="message"
-          required
           rows={6}
           placeholder={form.messagePlaceholder}
-          className={`${fieldClass} resize-y`}
+          className={`${inputCls("message")} resize-y`}
+          {...a11y("message")}
         />
+        <FieldError name="message" />
       </div>
 
       {status === "error" && (
