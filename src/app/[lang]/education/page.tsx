@@ -33,8 +33,31 @@ export default async function EducationPage({
     <>
       <PageHeader eyebrow={t.title} title={t.subtitle} lead={t.lead} />
 
+      {/* Why learn with us */}
+      <section className="border-b border-slate-200 py-14">
+        <Container>
+          <div className="grid gap-6 md:grid-cols-3">
+            {t.features.map((f, i) => (
+              <div
+                key={f.title}
+                className={`reveal reveal-${(i % 3) + 1} rounded-2xl border border-slate-200 bg-white p-6`}
+              >
+                <div className="grid h-10 w-10 place-items-center rounded-lg bg-blue-50 text-sm font-bold text-blue-600">
+                  {i + 1}
+                </div>
+                <h2 className="mt-4 text-lg font-bold text-slate-900">{f.title}</h2>
+                <p className="mt-2 text-sm leading-relaxed text-slate-600">{f.desc}</p>
+              </div>
+            ))}
+          </div>
+        </Container>
+      </section>
+
       <section className="py-16 sm:py-20">
         <Container>
+          <h2 className="mb-8 text-2xl font-bold tracking-tight text-slate-900">
+            {t.coursesTitle}
+          </h2>
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {courses.map((course, i) => (
               <Link

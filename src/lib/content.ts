@@ -115,6 +115,142 @@ export const courses: Course[] = [
       en: ["Anyone who wants to ship an app", "Developers with web experience", "Aspiring solo developers"],
     },
   },
+  {
+    slug: "network-systems",
+    title: { ko: "네트워크 시스템", en: "Network Systems" },
+    summary: {
+      ko: "TCP/IP부터 라우팅·스위칭, 방화벽, 클라우드 네트워크까지 인프라의 뼈대를 다집니다.",
+      en: "From TCP/IP to routing, switching, firewalls, and cloud networking — the backbone of infrastructure.",
+    },
+    duration: { ko: "10주 (주 2회)", en: "10 weeks (2×/week)" },
+    level: { ko: "입문 ~ 중급", en: "Beginner to Intermediate" },
+    format: { ko: "온·오프라인 병행", en: "Online + offline" },
+    tags: ["TCP/IP", "Routing", "Security", "Cloud"],
+    curriculum: {
+      ko: [
+        "네트워크 기본 개념과 OSI 7계층",
+        "IP 주소 체계와 서브네팅",
+        "라우팅과 스위칭의 원리",
+        "방화벽·VPN과 네트워크 보안",
+        "클라우드 네트워킹 (VPC·로드밸런싱)",
+        "실습: 소규모 네트워크 설계·구축",
+      ],
+      en: [
+        "Networking fundamentals and the OSI model",
+        "IP addressing and subnetting",
+        "How routing and switching work",
+        "Firewalls, VPNs, and network security",
+        "Cloud networking (VPC, load balancing)",
+        "Hands-on: design and build a small network",
+      ],
+    },
+    audience: {
+      ko: ["인프라·네트워크 엔지니어 지망생", "서버·클라우드 운영 담당자", "정보처리·네트워크 자격증 준비생"],
+      en: ["Aspiring infra/network engineers", "Server & cloud operators", "Certification candidates"],
+    },
+  },
+  {
+    slug: "cloud-devops",
+    title: { ko: "클라우드 · DevOps", en: "Cloud & DevOps" },
+    summary: {
+      ko: "AWS·Docker·쿠버네티스·CI/CD로 배포와 운영을 자동화합니다.",
+      en: "Automate deployment and operations with AWS, Docker, Kubernetes, and CI/CD.",
+    },
+    duration: { ko: "12주 (주 2회)", en: "12 weeks (2×/week)" },
+    level: { ko: "중급", en: "Intermediate" },
+    format: { ko: "온라인", en: "Online" },
+    tags: ["AWS", "Docker", "Kubernetes", "CI/CD"],
+    curriculum: {
+      ko: [
+        "클라우드 기초와 AWS 핵심 서비스",
+        "리눅스·셸과 인프라 자동화",
+        "컨테이너: Docker 이미지·네트워크·볼륨",
+        "쿠버네티스로 배포·스케일링",
+        "CI/CD 파이프라인 구축",
+        "모니터링·로깅과 운영",
+      ],
+      en: [
+        "Cloud basics and core AWS services",
+        "Linux, shell, and infrastructure automation",
+        "Containers: Docker images, networking, volumes",
+        "Deployment and scaling with Kubernetes",
+        "Building CI/CD pipelines",
+        "Monitoring, logging, and operations",
+      ],
+    },
+    audience: {
+      ko: ["서버 개발자에서 DevOps로 전환하려는 분", "배포·운영 자동화가 필요한 팀", "클라우드 자격증 준비생"],
+      en: ["Developers moving into DevOps", "Teams needing deploy/ops automation", "Cloud certification candidates"],
+    },
+  },
+  {
+    slug: "security",
+    title: { ko: "정보보안 입문", en: "Information Security Foundations" },
+    summary: {
+      ko: "웹·시스템 취약점, 암호화, 모의해킹 기초까지 방어의 관점에서 배웁니다.",
+      en: "Web/system vulnerabilities, cryptography, and pentesting basics — from a defender's view.",
+    },
+    duration: { ko: "10주 (주 2회)", en: "10 weeks (2×/week)" },
+    level: { ko: "입문", en: "Beginner" },
+    format: { ko: "온·오프라인 병행", en: "Online + offline" },
+    tags: ["Security", "OWASP", "Crypto", "Pentest"],
+    curriculum: {
+      ko: [
+        "정보보안 개요와 위협 모델",
+        "웹 취약점 (OWASP Top 10)",
+        "네트워크·시스템 보안 기초",
+        "암호화와 인증의 원리",
+        "모의해킹·취약점 진단 실습",
+        "보안 운영과 사고 대응",
+      ],
+      en: [
+        "Security overview and threat modeling",
+        "Web vulnerabilities (OWASP Top 10)",
+        "Network and system security basics",
+        "Cryptography and authentication",
+        "Hands-on pentesting and vulnerability scanning",
+        "Security operations and incident response",
+      ],
+    },
+    audience: {
+      ko: ["보안 직무로 전환하려는 분", "보안 역량을 키우려는 개발자", "보안 자격증 준비생"],
+      en: ["Career switchers into security", "Developers strengthening security skills", "Security certification candidates"],
+    },
+  },
+  {
+    slug: "backend",
+    title: { ko: "백엔드 개발 심화", en: "Backend Engineering" },
+    summary: {
+      ko: "API 설계, 데이터베이스, 인증, 대용량 처리까지 서버 개발의 핵심을 다집니다.",
+      en: "API design, databases, auth, and scale — the core of server engineering.",
+    },
+    duration: { ko: "12주 (주 2회)", en: "12 weeks (2×/week)" },
+    level: { ko: "중급", en: "Intermediate" },
+    format: { ko: "온·오프라인 병행", en: "Online + offline" },
+    tags: ["Node.js", "SQL", "Redis", "API"],
+    curriculum: {
+      ko: [
+        "백엔드 아키텍처와 REST/GraphQL",
+        "데이터베이스 설계와 쿼리 최적화",
+        "인증·인가와 보안",
+        "캐싱과 메시지 큐",
+        "테스트와 배포 파이프라인",
+        "실전: 확장 가능한 API 서버 구축",
+      ],
+      en: [
+        "Backend architecture and REST/GraphQL",
+        "Database design and query optimization",
+        "Authentication, authorization, and security",
+        "Caching and message queues",
+        "Testing and deployment pipelines",
+        "Hands-on: build a scalable API server",
+      ],
+    },
+    audience: {
+      ko: ["프론트엔드에서 풀스택으로 확장하려는 분", "서버 개발 역량을 키우려는 개발자", "백엔드 취업 준비생"],
+      en: ["Frontend devs expanding to full-stack", "Developers deepening backend skills", "Backend job seekers"],
+    },
+  },
 ];
 
 export function getCourse(slug: string): Course | undefined {
@@ -207,5 +343,32 @@ export const projects: Project[] = [
       en: "Rebuilt an aging site as responsive and multilingual, lifting inquiry conversion.",
     },
     tags: ["Next.js", "i18n", "SEO"],
+  },
+  {
+    title: { ko: "사내 네트워크 · 보안 구축", en: "Corporate Network & Security" },
+    category: { ko: "인프라", en: "Infrastructure" },
+    desc: {
+      ko: "지사 간 네트워크를 재설계하고 방화벽·VPN으로 보안을 강화했습니다.",
+      en: "Redesigned inter-office networking and hardened security with firewalls and VPNs.",
+    },
+    tags: ["Network", "Firewall", "VPN"],
+  },
+  {
+    title: { ko: "클라우드 마이그레이션", en: "Cloud Migration" },
+    category: { ko: "클라우드 · DevOps", en: "Cloud & DevOps" },
+    desc: {
+      ko: "온프레미스 서비스를 AWS로 이전하고 CI/CD·오토스케일링을 도입했습니다.",
+      en: "Migrated on-prem services to AWS with CI/CD and autoscaling.",
+    },
+    tags: ["AWS", "Docker", "CI/CD"],
+  },
+  {
+    title: { ko: "AI 상담 챗봇", en: "AI Support Chatbot" },
+    category: { ko: "AI", en: "AI" },
+    desc: {
+      ko: "사내 문서를 학습한 LLM 챗봇으로 고객 문의 응대를 자동화했습니다.",
+      en: "Automated customer support with an LLM chatbot trained on internal docs.",
+    },
+    tags: ["LLM", "RAG", "Next.js"],
   },
 ];
