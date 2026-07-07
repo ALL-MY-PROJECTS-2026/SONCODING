@@ -85,3 +85,7 @@
 - 헤더는 로드 시 타이핑, 푸터는 정적. reduced-motion 시 즉시 전체 표시·커서 정지. 커서 blink CSS(`.caret`)
 - Logo를 client 컴포넌트화, Header/Footer의 별도 워드마크 제거
 - 영향: 항목 3·4 (모던·키네틱 타이포)
+
+### 회차 10 — 로고 글꼴 업그레이드
+- 로고 워드마크 모노 폰트를 Geist Mono → **JetBrains Mono**로 교체(각지고 또렷한 개발자 표준). `--font-mono`가 JetBrains Mono를 가리키도록 layout·globals 수정.
+- 영향: 항목 4 (타이포)

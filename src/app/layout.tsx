@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Noto_Sans_KR } from "next/font/google";
+import { Geist, JetBrains_Mono, Noto_Sans_KR } from "next/font/google";
 import "./globals.css";
 import { site } from "@/config/site";
 
@@ -8,9 +8,11 @@ const geistSans = Geist({
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+// Logo wordmark / mono — JetBrains Mono for a crisp terminal feel.
+const brandMono = JetBrains_Mono({
+  variable: "--font-mono-brand",
   subsets: ["latin"],
+  weight: ["400", "500", "700"],
 });
 
 const notoKR = Noto_Sans_KR({
@@ -35,7 +37,7 @@ export default function RootLayout({
   return (
     <html
       lang="ko"
-      className={`${geistSans.variable} ${geistMono.variable} ${notoKR.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${brandMono.variable} ${notoKR.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-white text-slate-900">
         {children}
