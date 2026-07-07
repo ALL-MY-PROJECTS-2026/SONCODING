@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowRight, UserCheck, Rocket, HeartHandshake, type LucideIcon } from "lucide-react";
@@ -6,9 +7,23 @@ import { Aurora } from "@/components/Aurora";
 import { HeroCanvas } from "@/components/HeroCanvas";
 import { CountUp } from "@/components/CountUp";
 import { CTA } from "@/components/CTA";
+import { site } from "@/config/site";
 import { getDictionary, isLocale, type Locale } from "@/lib/i18n";
 
 const whyIcons: LucideIcon[] = [UserCheck, Rocket, HeartHandshake];
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}): Promise<Metadata> {
+  const { lang } = await params;
+  const locale: Locale = isLocale(lang) ? lang : "ko";
+  return {
+    title: { absolute: `${site.name} — ${site.tagline[locale]}` },
+    description: site.tagline[locale],
+  };
+}
 
 export default async function HomePage({
   params,
