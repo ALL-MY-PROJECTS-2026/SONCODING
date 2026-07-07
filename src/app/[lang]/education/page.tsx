@@ -105,6 +105,44 @@ export default async function EducationPage({
         </Container>
       </section>
 
+      {/* Comparison table */}
+      <section className="border-t border-slate-200 bg-slate-50 py-16 sm:py-20">
+        <Container>
+          <h2 className="text-2xl font-bold tracking-tight text-slate-900">
+            {t.compareTitle}
+          </h2>
+          <div className="mt-8 overflow-x-auto rounded-2xl border border-slate-200 bg-white">
+            <table className="w-full min-w-[560px] text-left text-sm">
+              <thead>
+                <tr className="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-400">
+                  <th scope="col" className="px-5 py-4 font-semibold">{t.courseColLabel}</th>
+                  <th scope="col" className="px-5 py-4 font-semibold">{t.durationLabel}</th>
+                  <th scope="col" className="px-5 py-4 font-semibold">{t.levelLabel}</th>
+                  <th scope="col" className="px-5 py-4 font-semibold">{t.formatLabel}</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {courses.map((course) => (
+                  <tr key={course.slug} className="transition-colors hover:bg-slate-50">
+                    <th scope="row" className="px-5 py-4 font-medium text-slate-900">
+                      <Link
+                        href={`/${locale}/education/${course.slug}`}
+                        className="hover:text-blue-600 hover:underline"
+                      >
+                        {course.title[locale]}
+                      </Link>
+                    </th>
+                    <td className="px-5 py-4 text-slate-600">{course.duration[locale]}</td>
+                    <td className="px-5 py-4 text-slate-600">{course.level[locale]}</td>
+                    <td className="px-5 py-4 text-slate-600">{course.format[locale]}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Container>
+      </section>
+
       <CTA locale={locale} dict={dict} />
     </>
   );

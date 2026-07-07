@@ -161,3 +161,7 @@
 ### 회차 26 — Course 구조화 데이터
 - 과정 상세에 **Course JSON-LD**(schema.org: name·description·inLanguage·provider) 추가 — 검색결과 과정 정보 노출(breadcrumb·Organization 보완).
 - 영향: SEO
+
+### 회차 27 — 교육 과정 비교표
+- 교육 페이지에 **7개 과정 비교표**(과정·기간·난이도·방식) 추가. 반응형(모바일 가로 스크롤), 시맨틱 `<table>`(scope), 과정명은 상세 링크.
+- 영향: 항목 1·10 (탐색·콘텐츠)
