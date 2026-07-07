@@ -149,3 +149,7 @@
 - 과정 상세 상단에 **breadcrumb**(홈 / IT 교육 / 과정명, `nav[aria-label]`·`aria-current`) 추가 — 기존 back 링크 대체.
 - **BreadcrumbList JSON-LD**(schema.org) 삽입 — 검색결과 경로 표시(SEO).
 - 영향: 항목 7 (접근성)·SEO
+
+### 회차 24 — Organization 구조화 데이터
+- 홈에 **Organization JSON-LD**(schema.org: name·url·logo·description·email) 추가 — 검색엔진 회사 정보/지식패널용.
+- 영향: SEO

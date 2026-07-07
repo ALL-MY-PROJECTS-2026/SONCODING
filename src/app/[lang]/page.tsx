@@ -37,8 +37,23 @@ export default async function HomePage({
   const dict = getDictionary(locale);
   const t = dict.home;
 
+  const base = "https://all-my-projects-2026.github.io/SONCODING";
+  const orgLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: site.name,
+    url: `${base}/${locale}/`,
+    logo: `${base}/icon.svg`,
+    description: site.tagline[locale],
+    email: site.email,
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(orgLd) }}
+      />
       {/* Hero */}
       <section className="relative overflow-hidden border-b border-slate-200 bg-slate-50">
         <Aurora />
