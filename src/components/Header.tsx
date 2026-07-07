@@ -28,6 +28,16 @@ export function Header({
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Close the mobile menu on Escape.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
+
   const items = [
     { href: `/${locale}`, label: nav.home },
     { href: `/${locale}/about`, label: nav.about },
@@ -127,7 +137,7 @@ export function Header({
 
       {/* Mobile menu */}
       {open && (
-        <div className="border-t border-slate-200 bg-white md:hidden">
+        <div className="menu-in border-t border-slate-200 bg-white md:hidden">
           <Container className="py-3">
             <nav className="flex flex-col">
               {items.map((item) => (
