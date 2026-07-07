@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
@@ -18,6 +18,15 @@ export function Header({
 }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  // Shrink + shadow the header once the page is scrolled a little.
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   const items = [
     { href: `/${locale}`, label: nav.home },
@@ -41,9 +50,17 @@ export function Header({
   };
 
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-200/70 bg-white/80 backdrop-blur">
+    <header
+      className={`sticky top-0 z-50 border-b bg-white/80 backdrop-blur transition-shadow duration-200 ${
+        scrolled ? "border-slate-200 shadow-sm" : "border-slate-200/70"
+      }`}
+    >
       <Container>
-        <div className="flex h-16 items-center justify-between gap-4">
+        <div
+          className={`flex items-center justify-between gap-4 transition-[height] duration-200 ${
+            scrolled ? "h-14" : "h-16"
+          }`}
+        >
           <Link
             href={`/${locale}`}
             className="font-semibold tracking-tight text-slate-900"
