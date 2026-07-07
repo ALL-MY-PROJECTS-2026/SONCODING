@@ -173,3 +173,7 @@
 ### 회차 29 — WebSite 구조화 데이터
 - [lang] 레이아웃에 **WebSite JSON-LD**(name·url·inLanguage) 추가 → 전 페이지 site-wide. 구조화 데이터 세트 완성(WebSite·Organization·BreadcrumbList·Course).
 - 영향: SEO
+
+### 회차 30 — 홈 신뢰 배지 스트립
+- 히어로↔통계 사이에 **실무 안내 배지 4종**(무료 상담·1일 내 회신·한·영 지원·원격·방문) 슬림 스트립 추가. 체크 아이콘, 한/영. "왜 우리"와 중복 없는 실용 정보.
+- 영향: 항목 10 (콘텐츠·전환)

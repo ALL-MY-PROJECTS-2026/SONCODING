@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowRight, UserCheck, Rocket, HeartHandshake, Quote, type LucideIcon } from "lucide-react";
+import { ArrowRight, UserCheck, Rocket, HeartHandshake, Quote, Check, type LucideIcon } from "lucide-react";
 import { Container } from "@/components/Container";
 import { Aurora } from "@/components/Aurora";
 import { HeroCanvas } from "@/components/HeroCanvas";
@@ -85,6 +85,20 @@ export default async function HomePage({
               </Link>
             </div>
           </div>
+        </Container>
+      </section>
+
+      {/* Trust badges */}
+      <section className="border-b border-slate-200 bg-slate-50">
+        <Container>
+          <ul className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 py-4 text-sm text-slate-600">
+            {t.trustBadges.map((badge) => (
+              <li key={badge} className="inline-flex items-center gap-2">
+                <Check className="h-4 w-4 text-blue-600" aria-hidden="true" />
+                {badge}
+              </li>
+            ))}
+          </ul>
         </Container>
       </section>
 
