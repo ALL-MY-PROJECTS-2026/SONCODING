@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { Container } from "./Container";
 import { Logo } from "./Logo";
-import { site } from "@/config/site";
 import { locales, type Locale } from "@/lib/i18n";
 import type { Dictionary } from "@/lib/i18n";
 
@@ -47,11 +46,10 @@ export function Header({
         <div className="flex h-16 items-center justify-between gap-4">
           <Link
             href={`/${locale}`}
-            className="flex items-center gap-2 font-semibold tracking-tight"
+            className="font-semibold tracking-tight text-slate-900"
             onClick={() => setOpen(false)}
           >
-            <Logo />
-            <span className="text-lg text-slate-900">{site.name}</span>
+            <Logo locale={locale} animated />
           </Link>
 
           {/* Desktop nav */}

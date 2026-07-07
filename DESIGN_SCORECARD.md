@@ -78,3 +78,10 @@
 - 이름 SONCODING 워드마크 유지. blue-600 타일 + 흰 '손'(Noto Sans KR, 700).
 - ✅ 모든 페이지 점검(홈·소개·교육·과정상세·서비스·포트폴리오·문의 / ko·en, 14/14 HTTP 200·로고 반영).
 - 점검 중 발견·수정: 영문 홈 `<title>`이 한글 태그라인으로 나오던 것 → 홈에 per-locale generateMetadata 추가.
+
+### 회차 9 — 터미널 타이핑 로고 (사용자 요청)
+- 사용자 이미지 방향 반영: **`>_` 터미널 프롬프트 마크**(blue 타일) + **타이핑 애니메이션** + 깜빡이는 커서
+- **언어별 워드마크**: 한글=손코딩 / 영문=SONCODING (BRAND 맵, locale prop)
+- 헤더는 로드 시 타이핑, 푸터는 정적. reduced-motion 시 즉시 전체 표시·커서 정지. 커서 blink CSS(`.caret`)
+- Logo를 client 컴포넌트화, Header/Footer의 별도 워드마크 제거
+- 영향: 항목 3·4 (모던·키네틱 타이포)

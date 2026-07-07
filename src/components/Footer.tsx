@@ -24,9 +24,8 @@ export function Footer({
       <Container className="py-14">
         <div className="grid gap-10 md:grid-cols-3">
           <div>
-            <div className="flex items-center gap-2 font-semibold text-white">
-              <Logo />
-              <span className="text-lg">{site.name}</span>
+            <div className="font-semibold text-white">
+              <Logo locale={locale} />
             </div>
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-slate-400">
               {dict.footer.description}
