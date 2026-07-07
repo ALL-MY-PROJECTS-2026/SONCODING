@@ -129,3 +129,9 @@
 - 필드별 인라인 검증: blur/제출 시 빈 값·이메일 형식 오류를 즉시 표시(빨간 테두리 + 오류 문구), 수정 시 즉시 해제.
 - 접근성: aria-invalid·aria-describedby, 제출 시 첫 오류 필드로 포커스, noValidate로 커스텀 메시지 사용.
 - 영향: 항목 6·7 (폼 UX·접근성)
+
+### 회차 20 — sitemap.xml & robots.txt (SEO)
+- `app/sitemap.ts`(force-static) → **26개 URL**(한/영 × 13페이지, 절대 URL+basePath) 사이트맵 자동 생성.
+- `app/robots.ts` → robots.txt(전체 허용 + 사이트맵 참조).
+- 참고: GitHub Pages 프로젝트 경로라 robots.txt가 도메인 루트가 아닌 /SONCODING/robots.txt에 위치. 사이트맵은 Search Console에 전체 URL로 제출 가능.
+- 영향: SEO
