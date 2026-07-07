@@ -36,11 +36,11 @@ export default async function EducationPage({
       <section className="py-16 sm:py-20">
         <Container>
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {courses.map((course) => (
+            {courses.map((course, i) => (
               <Link
                 key={course.slug}
                 href={`/${locale}/education/${course.slug}`}
-                className="group flex flex-col rounded-2xl border border-slate-200 bg-white p-6 transition-all hover:border-blue-300 hover:shadow-lg hover:shadow-blue-100"
+                className={`reveal reveal-${(i % 3) + 1} group flex flex-col rounded-2xl border border-slate-200 bg-white p-6 transition-all hover:-translate-y-1 hover:border-blue-300 hover:shadow-xl hover:shadow-blue-100`}
               >
                 <div className="flex flex-wrap gap-1.5">
                   {course.tags.slice(0, 3).map((tag) => (

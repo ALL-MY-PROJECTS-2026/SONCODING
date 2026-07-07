@@ -39,10 +39,10 @@ export default async function ServicesPage({
             {t.offerTitle}
           </h2>
           <div className="mt-8 grid gap-6 sm:grid-cols-2">
-            {services.map((s) => (
+            {services.map((s, i) => (
               <div
                 key={s.icon}
-                className="flex gap-5 rounded-2xl border border-slate-200 bg-white p-6"
+                className={`reveal reveal-${(i % 3) + 1} flex gap-5 rounded-2xl border border-slate-200 bg-white p-6 transition-shadow hover:shadow-md`}
               >
                 <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-blue-50 text-blue-600">
                   <ServiceIcon icon={s.icon} />
@@ -68,8 +68,11 @@ export default async function ServicesPage({
             {t.processTitle}
           </h2>
           <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            {t.process.map((p) => (
-              <div key={p.step} className="relative rounded-2xl bg-white p-6 shadow-sm">
+            {t.process.map((p, i) => (
+              <div
+                key={p.step}
+                className={`reveal reveal-${(i % 3) + 1} relative rounded-2xl bg-white p-6 shadow-sm`}
+              >
                 <div className="text-3xl font-bold text-blue-600/30">
                   {p.step}
                 </div>

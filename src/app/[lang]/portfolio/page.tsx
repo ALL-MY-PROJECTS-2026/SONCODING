@@ -37,7 +37,7 @@ export default async function PortfolioPage({
             {projects.map((p, i) => (
               <article
                 key={i}
-                className="group overflow-hidden rounded-2xl border border-slate-200 bg-white transition-all hover:shadow-lg hover:shadow-slate-200"
+                className={`reveal reveal-${(i % 3) + 1} group overflow-hidden rounded-2xl border border-slate-200 bg-white transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-200`}
               >
                 <div className="relative flex h-40 items-center justify-center bg-gradient-to-br from-slate-900 to-blue-800">
                   <div className="bg-grid absolute inset-0 opacity-30" />

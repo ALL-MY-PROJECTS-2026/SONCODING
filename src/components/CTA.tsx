@@ -7,7 +7,7 @@ export function CTA({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   return (
     <section className="py-16 sm:py-20">
       <Container>
-        <div className="group relative overflow-hidden rounded-3xl bg-slate-950 px-6 py-14 text-center sm:px-16 sm:py-16">
+        <div className="reveal group relative overflow-hidden rounded-3xl bg-slate-950 px-6 py-14 text-center sm:px-16 sm:py-16">
           <div className="bg-grid pointer-events-none absolute inset-0 opacity-40" />
           <div className="relative">
             <h2 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">

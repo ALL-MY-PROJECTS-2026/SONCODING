@@ -23,7 +23,8 @@ export default async function HomePage({
       {/* Hero */}
       <section className="relative overflow-hidden border-b border-slate-200 bg-slate-50">
         <div className="bg-grid pointer-events-none absolute inset-0 opacity-70" />
-        <div className="pointer-events-none absolute -top-24 right-0 h-72 w-72 rounded-full bg-blue-200/40 blur-3xl" />
+        <div className="animate-float-glow pointer-events-none absolute -top-24 right-0 h-72 w-72 rounded-full bg-blue-300/40 blur-3xl" />
+        <div className="animate-float-glow pointer-events-none absolute top-40 -left-10 h-64 w-64 rounded-full bg-indigo-200/40 blur-3xl [animation-delay:-4s]" />
         <Container className="relative py-24 sm:py-32">
           <div className="max-w-3xl">
             <span className="inline-flex items-center rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
@@ -57,8 +58,8 @@ export default async function HomePage({
       <section className="border-b border-slate-200 py-16">
         <Container>
           <dl className="grid grid-cols-2 gap-8 sm:grid-cols-4">
-            {t.stats.map((s) => (
-              <div key={s.label} className="text-center">
+            {t.stats.map((s, i) => (
+              <div key={s.label} className={`reveal reveal-${(i % 3) + 1} text-center`}>
                 <dt className="text-3xl font-bold tracking-tight text-blue-600 sm:text-4xl">
                   {s.value}
                 </dt>
@@ -72,7 +73,7 @@ export default async function HomePage({
       {/* Pillars */}
       <section className="py-20 sm:py-24">
         <Container>
-          <div className="mx-auto max-w-2xl text-center">
+          <div className="reveal mx-auto max-w-2xl text-center">
             <h2 className="text-3xl font-bold tracking-tight text-slate-900">
               {t.pillarsTitle}
             </h2>
@@ -81,7 +82,7 @@ export default async function HomePage({
           <div className="mt-12 grid gap-6 md:grid-cols-2">
             <Link
               href={`/${locale}/education`}
-              className="group rounded-2xl border border-slate-200 bg-white p-8 transition-all hover:border-blue-300 hover:shadow-lg hover:shadow-blue-100"
+              className="reveal group rounded-2xl border border-slate-200 bg-white p-8 transition-all hover:-translate-y-1 hover:border-blue-300 hover:shadow-xl hover:shadow-blue-100"
             >
               <div className="text-sm font-semibold uppercase tracking-wide text-blue-600">
                 01
@@ -99,7 +100,7 @@ export default async function HomePage({
             </Link>
             <Link
               href={`/${locale}/services`}
-              className="group rounded-2xl border border-slate-200 bg-white p-8 transition-all hover:border-blue-300 hover:shadow-lg hover:shadow-blue-100"
+              className="reveal group rounded-2xl border border-slate-200 bg-white p-8 transition-all hover:-translate-y-1 hover:border-blue-300 hover:shadow-xl hover:shadow-blue-100"
             >
               <div className="text-sm font-semibold uppercase tracking-wide text-blue-600">
                 02
@@ -122,14 +123,17 @@ export default async function HomePage({
       {/* Why */}
       <section className="border-t border-slate-200 bg-slate-50 py-20 sm:py-24">
         <Container>
-          <h2 className="text-center text-3xl font-bold tracking-tight text-slate-900">
+          <h2 className="reveal text-center text-3xl font-bold tracking-tight text-slate-900">
             {t.whyTitle}
           </h2>
           <div className="mt-12 grid gap-8 md:grid-cols-3">
             {t.why.map((w, i) => {
               const Icon = whyIcons[i] ?? UserCheck;
               return (
-                <div key={i} className="rounded-2xl bg-white p-7 shadow-sm">
+                <div
+                  key={i}
+                  className={`reveal reveal-${(i % 3) + 1} rounded-2xl bg-white p-7 shadow-sm transition-shadow hover:shadow-md`}
+                >
                   <div className="grid h-11 w-11 place-items-center rounded-xl bg-blue-600 text-white">
                     <Icon className="h-5 w-5" />
                   </div>
