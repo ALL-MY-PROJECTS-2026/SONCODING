@@ -31,6 +31,18 @@ body {
   background-size: 44px 44px;
 }
 
+/* Top scroll-progress bar — base styles (always positioned; hidden until the
+   scroll timeline scales it). Sits above the sticky header. */
+.scroll-progress {
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: 3px;
+  z-index: 60;
+  transform: scaleX(0);
+  transform-origin: left center;
+  background: linear-gradient(90deg, #2563eb, #6366f1, #22d3ee);
+}
+
 /* ---------------------------------------------------------------------------
    Scroll-driven reveal (2026 trend: native CSS scroll animations).
    Elements rise + fade in as they enter the viewport. Pure CSS, no JS.
@@ -59,6 +71,19 @@ body {
       opacity: 1;
       transform: translateY(0);
     }
+  }
+
+  /* Top scroll-progress bar (pure CSS scroll timeline).
+     Defaults to scaleX(0) so unsupported browsers simply show no bar. */
+  @supports (animation-timeline: scroll()) {
+    .scroll-progress {
+      animation: scroll-progress-grow linear;
+      animation-timeline: scroll(root block);
+    }
+  }
+  @keyframes scroll-progress-grow {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
   }
 
   /* Slow floating glow used behind the hero */

@@ -21,6 +21,7 @@ export default async function LangLayout({
 
   return (
     <>
+      <div className="scroll-progress" aria-hidden="true" />
       <Header locale={lang} nav={dict.nav} />
       <main className="flex-1">{children}</main>
       <Footer locale={lang} dict={dict} />

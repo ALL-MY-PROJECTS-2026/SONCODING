@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowRight, UserCheck, Rocket, HeartHandshake, type LucideIcon } from "lucide-react";
 import { Container } from "@/components/Container";
+import { CountUp } from "@/components/CountUp";
 import { CTA } from "@/components/CTA";
 import { getDictionary, isLocale, type Locale } from "@/lib/i18n";
 
@@ -61,7 +62,7 @@ export default async function HomePage({
             {t.stats.map((s, i) => (
               <div key={s.label} className={`reveal reveal-${(i % 3) + 1} text-center`}>
                 <dt className="text-3xl font-bold tracking-tight text-blue-600 sm:text-4xl">
-                  {s.value}
+                  <CountUp value={s.value} />
                 </dt>
                 <dd className="mt-2 text-sm text-slate-500">{s.label}</dd>
               </div>
