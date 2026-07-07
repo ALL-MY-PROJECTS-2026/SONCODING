@@ -4,7 +4,7 @@ import { Container } from "@/components/Container";
 import { PageHeader } from "@/components/PageHeader";
 import { CTA } from "@/components/CTA";
 import { ServiceIcon } from "@/components/Icons";
-import { services } from "@/lib/content";
+import { services, techStack } from "@/lib/content";
 import { getDictionary, isLocale, type Locale } from "@/lib/i18n";
 
 export async function generateMetadata({
@@ -61,8 +61,42 @@ export default async function ServicesPage({
         </Container>
       </section>
 
-      {/* Process */}
+      {/* Tech stack */}
       <section className="border-t border-slate-200 bg-slate-50 py-16 sm:py-20">
+        <Container>
+          <div className="reveal">
+            <h2 className="text-2xl font-bold tracking-tight text-slate-900">
+              {t.stackTitle}
+            </h2>
+            <p className="mt-3 max-w-2xl text-slate-600">{t.stackLead}</p>
+          </div>
+          <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {techStack.map((group, i) => (
+              <div
+                key={group.label.en}
+                className={`reveal reveal-${(i % 3) + 1} rounded-2xl border border-slate-200 bg-white p-6`}
+              >
+                <h3 className="text-xs font-semibold uppercase tracking-wide text-blue-600">
+                  {group.label[locale]}
+                </h3>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {group.items.map((item) => (
+                    <span
+                      key={item}
+                      className="rounded-lg bg-slate-100 px-2.5 py-1 font-mono text-sm text-slate-700"
+                    >
+                      {item}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </Container>
+      </section>
+
+      {/* Process */}
+      <section className="border-t border-slate-200 bg-white py-16 sm:py-20">
         <Container>
           <h2 className="text-2xl font-bold tracking-tight text-slate-900">
             {t.processTitle}

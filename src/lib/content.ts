@@ -299,6 +299,20 @@ export const services: Service[] = [
   },
 ];
 
+// --- Tech stack -----------------------------------------------------------
+export interface TechGroup {
+  label: L10n;
+  items: string[];
+}
+
+export const techStack: TechGroup[] = [
+  { label: { ko: "프론트엔드", en: "Frontend" }, items: ["React", "Next.js", "TypeScript", "Tailwind CSS"] },
+  { label: { ko: "백엔드", en: "Backend" }, items: ["Node.js", "Python", "PostgreSQL", "Redis"] },
+  { label: { ko: "모바일", en: "Mobile" }, items: ["React Native", "Expo"] },
+  { label: { ko: "인프라 · DevOps", en: "Infra & DevOps" }, items: ["AWS", "Docker", "Kubernetes", "GitHub Actions"] },
+  { label: { ko: "AI · 데이터", en: "AI & Data" }, items: ["Python", "Pandas", "LLM / RAG"] },
+];
+
 // --- Portfolio ------------------------------------------------------------
 export interface Project {
   title: L10n;

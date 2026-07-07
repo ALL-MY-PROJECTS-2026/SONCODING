@@ -108,6 +108,8 @@ const dictionaries = {
       subtitle: "아이디어를 제품으로",
       lead: "웹·앱·자동화·맞춤형 솔루션까지. 기획부터 개발, 운영까지 한 팀이 함께합니다.",
       offerTitle: "제공 서비스",
+      stackTitle: "기술 스택",
+      stackLead: "검증된 기술로 안정적이고 유지보수하기 좋게 만듭니다.",
       processTitle: "진행 프로세스",
       process: [
         { step: "01", title: "상담·기획", desc: "요구사항을 함께 정리하고 범위와 일정을 확정합니다." },
@@ -276,6 +278,8 @@ const dictionaries = {
       subtitle: "From idea to product",
       lead: "Web, apps, automation, and custom solutions — one team from planning to development to operations.",
       offerTitle: "What we offer",
+      stackTitle: "Tech stack",
+      stackLead: "We build on proven technologies that stay stable and maintainable.",
       processTitle: "How we work",
       process: [
         { step: "01", title: "Consult & plan", desc: "We shape requirements together and lock scope and timeline." },
