@@ -123,6 +123,7 @@ const dictionaries = {
       title: "포트폴리오",
       subtitle: "우리가 만든 것들",
       lead: "교육과 개발 현장에서 실제로 완성한 프로젝트들입니다.",
+      allLabel: "전체",
     },
     contact: {
       title: "문의하기",
@@ -294,6 +295,7 @@ const dictionaries = {
       title: "Portfolio",
       subtitle: "Things we've built",
       lead: "Real projects completed across our education and development work.",
+      allLabel: "All",
     },
     contact: {
       title: "Contact",
