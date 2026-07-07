@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowRight, UserCheck, Rocket, HeartHandshake, type LucideIcon } from "lucide-react";
+import { ArrowRight, UserCheck, Rocket, HeartHandshake, Quote, type LucideIcon } from "lucide-react";
 import { Container } from "@/components/Container";
 import { Aurora } from "@/components/Aurora";
 import { HeroCanvas } from "@/components/HeroCanvas";
 import { CountUp } from "@/components/CountUp";
 import { CTA } from "@/components/CTA";
+import { testimonials } from "@/lib/content";
 import { site } from "@/config/site";
 import { getDictionary, isLocale, type Locale } from "@/lib/i18n";
 
@@ -162,6 +163,34 @@ export default async function HomePage({
                 </div>
               );
             })}
+          </div>
+        </Container>
+      </section>
+
+      {/* Testimonials */}
+      <section className="border-t border-slate-200 py-20 sm:py-24">
+        <Container>
+          <h2 className="reveal text-center text-3xl font-bold tracking-tight text-slate-900">
+            {t.testimonialsTitle}
+          </h2>
+          <div className="mt-12 grid gap-6 md:grid-cols-3">
+            {testimonials.map((item, i) => (
+              <figure
+                key={i}
+                className={`reveal reveal-${(i % 3) + 1} flex flex-col rounded-2xl border border-slate-200 bg-white p-7`}
+              >
+                <Quote className="h-8 w-8 text-blue-200" aria-hidden="true" />
+                <blockquote className="mt-4 flex-1 leading-relaxed text-slate-700">
+                  {item.quote[locale]}
+                </blockquote>
+                <figcaption className="mt-6 border-t border-slate-100 pt-4">
+                  <div className="font-semibold text-slate-900">
+                    {item.author[locale]}
+                  </div>
+                  <div className="text-sm text-slate-500">{item.role[locale]}</div>
+                </figcaption>
+              </figure>
+            ))}
           </div>
         </Container>
       </section>

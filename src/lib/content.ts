@@ -299,6 +299,40 @@ export const services: Service[] = [
   },
 ];
 
+// --- Testimonials ---------------------------------------------------------
+export interface Testimonial {
+  quote: L10n;
+  author: L10n;
+  role: L10n;
+}
+
+export const testimonials: Testimonial[] = [
+  {
+    quote: {
+      ko: "비전공자였는데 프로젝트 중심 수업 덕분에 첫 개발자 취업에 성공했어요.",
+      en: "I had no CS background, but the project-driven course landed me my first developer job.",
+    },
+    author: { ko: "김○○", en: "Ms. Kim" },
+    role: { ko: "웹 풀스택 수료생", en: "Full-Stack graduate" },
+  },
+  {
+    quote: {
+      ko: "요구사항을 정확히 이해하고 일정 안에 안정적으로 만들어줬습니다.",
+      en: "They understood our requirements precisely and delivered reliably, on schedule.",
+    },
+    author: { ko: "박○○", en: "Mr. Park" },
+    role: { ko: "스타트업 대표", en: "Startup founder" },
+  },
+  {
+    quote: {
+      ko: "현업 개발자에게 배우니 실무 감각이 확실히 다릅니다.",
+      en: "Learning from working developers made a real difference in practical skills.",
+    },
+    author: { ko: "이○○", en: "Ms. Lee" },
+    role: { ko: "데이터 분석 수료생", en: "Data Analysis graduate" },
+  },
+];
+
 // --- Tech stack -----------------------------------------------------------
 export interface TechGroup {
   label: L10n;
