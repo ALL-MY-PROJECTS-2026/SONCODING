@@ -1,0 +1,142 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { ArrowLeft, Check } from "lucide-react";
+import { Container } from "@/components/Container";
+import { courses, getCourse } from "@/lib/content";
+import { getDictionary, isLocale, locales, type Locale } from "@/lib/i18n";
+
+export function generateStaticParams() {
+  return locales.flatMap((lang) =>
+    courses.map((course) => ({ lang, slug: course.slug })),
+  );
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string; slug: string }>;
+}): Promise<Metadata> {
+  const { lang, slug } = await params;
+  const locale: Locale = isLocale(lang) ? lang : "ko";
+  const course = getCourse(slug);
+  return { title: course ? course.title[locale] : getDictionary(locale).education.title };
+}
+
+export default async function CourseDetailPage({
+  params,
+}: {
+  params: Promise<{ lang: string; slug: string }>;
+}) {
+  const { lang, slug } = await params;
+  if (!isLocale(lang)) notFound();
+  const locale: Locale = lang;
+  const course = getCourse(slug);
+  if (!course) notFound();
+
+  const dict = getDictionary(locale);
+  const t = dict.education;
+
+  const meta = [
+    { label: t.durationLabel, value: course.duration[locale] },
+    { label: t.levelLabel, value: course.level[locale] },
+    { label: t.formatLabel, value: course.format[locale] },
+  ];
+
+  return (
+    <>
+      <section className="relative overflow-hidden border-b border-slate-200 bg-slate-50">
+        <div className="bg-grid pointer-events-none absolute inset-0 opacity-60" />
+        <Container className="relative py-14 sm:py-20">
+          <Link
+            href={`/${locale}/education`}
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-800"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            {dict.common.backToList}
+          </Link>
+          <div className="mt-5 flex flex-wrap gap-1.5">
+            {course.tags.map((tag) => (
+              <span
+                key={tag}
+                className="rounded-md bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+          <h1 className="mt-4 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+            {course.title[locale]}
+          </h1>
+          <p className="mt-4 max-w-2xl text-lg leading-relaxed text-slate-600">
+            {course.summary[locale]}
+          </p>
+        </Container>
+      </section>
+
+      <section className="py-14 sm:py-16">
+        <Container>
+          <div className="grid gap-10 lg:grid-cols-[2fr_1fr]">
+            <div className="space-y-12">
+              {/* Curriculum */}
+              <div>
+                <h2 className="text-xl font-bold text-slate-900">
+                  {t.curriculumTitle}
+                </h2>
+                <ol className="mt-5 space-y-3">
+                  {course.curriculum[locale].map((item, i) => (
+                    <li key={i} className="flex gap-4 rounded-xl border border-slate-200 bg-white p-4">
+                      <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-blue-600 text-sm font-bold text-white">
+                        {i + 1}
+                      </span>
+                      <span className="pt-0.5 text-slate-700">{item}</span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+
+              {/* Audience */}
+              <div>
+                <h2 className="text-xl font-bold text-slate-900">
+                  {t.targetTitle}
+                </h2>
+                <ul className="mt-5 space-y-2">
+                  {course.audience[locale].map((item, i) => (
+                    <li key={i} className="flex items-start gap-3 text-slate-700">
+                      <Check className="mt-0.5 h-5 w-5 shrink-0 text-blue-600" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            {/* Sidebar */}
+            <aside className="lg:sticky lg:top-24 lg:self-start">
+              <div className="rounded-2xl border border-slate-200 bg-white p-6">
+                <dl className="space-y-4">
+                  {meta.map((m) => (
+                    <div key={m.label}>
+                      <dt className="text-xs font-medium uppercase tracking-wide text-slate-400">
+                        {m.label}
+                      </dt>
+                      <dd className="mt-1 font-semibold text-slate-800">
+                        {m.value}
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+                <Link
+                  href={`/${locale}/contact`}
+                  className="mt-6 block rounded-full bg-blue-600 px-5 py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-blue-700"
+                >
+                  {dict.common.applyCourse}
+                </Link>
+              </div>
+            </aside>
+          </div>
+        </Container>
+      </section>
+    </>
+  );
+}
