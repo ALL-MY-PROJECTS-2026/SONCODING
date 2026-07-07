@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Container } from "./Container";
+import { Logo } from "./Logo";
 import { site } from "@/config/site";
 import type { Dictionary, Locale } from "@/lib/i18n";
 
@@ -24,9 +25,7 @@ export function Footer({
         <div className="grid gap-10 md:grid-cols-3">
           <div>
             <div className="flex items-center gap-2 font-semibold text-white">
-              <span className="grid h-8 w-8 place-items-center rounded-lg bg-blue-600 text-sm font-bold">
-                S
-              </span>
+              <Logo />
               <span className="text-lg">{site.name}</span>
             </div>
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-slate-400">

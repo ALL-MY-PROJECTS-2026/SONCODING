@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { Container } from "./Container";
+import { Logo } from "./Logo";
 import { site } from "@/config/site";
 import { locales, type Locale } from "@/lib/i18n";
 import type { Dictionary } from "@/lib/i18n";
@@ -49,9 +50,7 @@ export function Header({
             className="flex items-center gap-2 font-semibold tracking-tight"
             onClick={() => setOpen(false)}
           >
-            <span className="grid h-8 w-8 place-items-center rounded-lg bg-blue-600 text-sm font-bold text-white">
-              S
-            </span>
+            <Logo />
             <span className="text-lg text-slate-900">{site.name}</span>
           </Link>
 
