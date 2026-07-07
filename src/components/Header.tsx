@@ -155,6 +155,13 @@ export function Header({
                 </Link>
               ))}
             </nav>
+            <Link
+              href={`/${locale}/contact`}
+              onClick={() => setOpen(false)}
+              className="mt-3 block rounded-full bg-blue-600 px-4 py-2.5 text-center text-sm font-semibold text-white transition-colors hover:bg-blue-700"
+            >
+              {nav.contact}
+            </Link>
             <div className="mt-3 flex items-center gap-2 border-t border-slate-100 pt-3">
               {locales.map((l) => (
                 <Link
