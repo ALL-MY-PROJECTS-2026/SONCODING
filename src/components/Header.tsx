@@ -85,9 +85,10 @@ export function Header({
               <Link
                 key={item.href}
                 href={item.href}
-                className={`rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+                aria-current={isActive(item.href) ? "page" : undefined}
+                className={`relative rounded-md px-3 py-2 text-sm font-medium transition-colors ${
                   isActive(item.href)
-                    ? "text-blue-600"
+                    ? "text-blue-600 after:absolute after:inset-x-3 after:-bottom-px after:h-0.5 after:rounded-full after:bg-blue-600"
                     : "text-slate-600 hover:text-slate-900"
                 }`}
               >
@@ -145,6 +146,7 @@ export function Header({
                   key={item.href}
                   href={item.href}
                   onClick={() => setOpen(false)}
+                  aria-current={isActive(item.href) ? "page" : undefined}
                   className={`rounded-md px-3 py-2.5 text-sm font-medium ${
                     isActive(item.href)
                       ? "bg-blue-50 text-blue-600"
