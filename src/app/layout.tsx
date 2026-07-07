@@ -22,11 +22,23 @@ const notoKR = Noto_Sans_KR({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://all-my-projects-2026.github.io/SONCODING"),
   title: {
     default: `${site.name} — ${site.tagline.ko}`,
     template: `%s | ${site.name}`,
   },
   description: site.tagline.ko,
+  openGraph: {
+    siteName: site.name,
+    type: "website",
+    title: `${site.name} — ${site.tagline.ko}`,
+    description: site.tagline.ko,
+  },
+  twitter: {
+    card: "summary",
+    title: `${site.name} — ${site.tagline.ko}`,
+    description: site.tagline.ko,
+  },
 };
 
 export default function RootLayout({

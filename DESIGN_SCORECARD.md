@@ -89,3 +89,8 @@
 ### 회차 10 — 로고 글꼴 업그레이드
 - 로고 워드마크 모노 폰트를 Geist Mono → **JetBrains Mono**로 교체(각지고 또렷한 개발자 표준). `--font-mono`가 JetBrains Mono를 가리키도록 layout·globals 수정.
 - 영향: 항목 4 (타이포)
+
+### 회차 12 — 파비콘 & OG 메타데이터
+- 기본 Next.js 파비콘 제거 → **터미널 `>_` 마크 SVG 파비콘**(app/icon.svg, blue 타일). basePath(/SONCODING) 자동 반영.
+- 기본 **OpenGraph·Twitter 메타** 추가(siteName·title·description·type) + metadataBase 설정 → 링크 공유 시 제목·설명 노출.
+- 영향: 항목 3 (모던·완성도), SEO/공유
