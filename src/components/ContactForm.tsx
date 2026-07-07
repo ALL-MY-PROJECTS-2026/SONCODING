@@ -78,9 +78,10 @@ export function ContactForm({ form }: { form: Dictionary["contact"]["form"] }) {
         <button
           type="button"
           onClick={() => setStatus("idle")}
-          className="mx-auto mt-6 inline-flex items-center gap-2 rounded-full border border-green-300 px-5 py-2 text-sm font-semibold text-green-800 hover:bg-green-100"
+          className="mx-auto mt-6 inline-flex items-center gap-2 rounded-full border border-green-300 px-5 py-2 text-sm font-semibold text-green-800 transition-colors hover:bg-green-100"
         >
           <RotateCcw className="h-4 w-4" />
+          {form.sendAnother}
         </button>
       </div>
     );
