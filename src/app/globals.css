@@ -31,6 +31,58 @@ body {
   background-size: 44px 44px;
 }
 
+/* ---------------------------------------------------------------------------
+   Aurora / mesh-gradient background (pure CSS, no assets — zero copyright).
+   Soft blurred color blobs that slowly drift behind hero / banner areas.
+--------------------------------------------------------------------------- */
+.aurora {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.aurora__blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(72px);
+  will-change: transform;
+}
+.aurora__blob--1 {
+  width: 46%; height: 62%; left: -6%; top: -18%;
+  background: #60a5fa; opacity: 0.55;
+}
+.aurora__blob--2 {
+  width: 40%; height: 58%; right: -8%; top: -12%;
+  background: #818cf8; opacity: 0.5;
+}
+.aurora__blob--3 {
+  width: 42%; height: 64%; left: 18%; bottom: -30%;
+  background: #22d3ee; opacity: 0.38;
+}
+.aurora__blob--4 {
+  width: 32%; height: 52%; right: 8%; bottom: -24%;
+  background: #a78bfa; opacity: 0.4;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes aurora-a {
+    0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+    50% { transform: translate3d(7%, 6%, 0) scale(1.15); }
+  }
+  @keyframes aurora-b {
+    0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+    50% { transform: translate3d(-9%, 7%, 0) scale(1.12); }
+  }
+  @keyframes aurora-c {
+    0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+    50% { transform: translate3d(6%, -8%, 0) scale(1.2); }
+  }
+  .aurora__blob--1 { animation: aurora-a 17s ease-in-out infinite; }
+  .aurora__blob--2 { animation: aurora-b 21s ease-in-out infinite; }
+  .aurora__blob--3 { animation: aurora-c 24s ease-in-out infinite; }
+  .aurora__blob--4 { animation: aurora-b 19s ease-in-out infinite reverse; }
+}
+
 /* Kinetic gradient text (2026 kinetic-typography trend).
    Solid fallback first; the gradient clip only applies where supported so
    text never renders invisible. */

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Container } from "@/components/Container";
+import { Aurora } from "@/components/Aurora";
 import { CTA } from "@/components/CTA";
 import { getDictionary, isLocale, type Locale } from "@/lib/i18n";
 
@@ -28,7 +29,8 @@ export default async function AboutPage({
   return (
     <>
       <section className="relative overflow-hidden border-b border-slate-200 bg-slate-50">
-        <div className="bg-grid pointer-events-none absolute inset-0 opacity-60" />
+        <Aurora className="opacity-70" />
+        <div className="bg-grid pointer-events-none absolute inset-0 opacity-50" />
         <Container className="relative py-16 sm:py-24">
           <span className="text-sm font-semibold uppercase tracking-wide text-blue-600">
             {t.title}

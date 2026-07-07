@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowRight, UserCheck, Rocket, HeartHandshake, type LucideIcon } from "lucide-react";
 import { Container } from "@/components/Container";
+import { Aurora } from "@/components/Aurora";
+import { HeroCanvas } from "@/components/HeroCanvas";
 import { CountUp } from "@/components/CountUp";
 import { CTA } from "@/components/CTA";
 import { getDictionary, isLocale, type Locale } from "@/lib/i18n";
@@ -23,9 +25,9 @@ export default async function HomePage({
     <>
       {/* Hero */}
       <section className="relative overflow-hidden border-b border-slate-200 bg-slate-50">
-        <div className="bg-grid pointer-events-none absolute inset-0 opacity-70" />
-        <div className="animate-float-glow pointer-events-none absolute -top-24 right-0 h-72 w-72 rounded-full bg-blue-300/40 blur-3xl" />
-        <div className="animate-float-glow pointer-events-none absolute top-40 -left-10 h-64 w-64 rounded-full bg-indigo-200/40 blur-3xl [animation-delay:-4s]" />
+        <Aurora />
+        <div className="bg-grid pointer-events-none absolute inset-0 opacity-50" />
+        <HeroCanvas />
         <Container className="relative py-24 sm:py-32">
           <div className="max-w-3xl">
             <span className="hero-in hero-in-1 inline-flex items-center rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
