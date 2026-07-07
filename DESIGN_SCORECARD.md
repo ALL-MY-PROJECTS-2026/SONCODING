@@ -169,3 +169,7 @@
 ### 회차 28 — 모바일 메뉴 접근성·디테일
 - 모바일 메뉴 **Esc 키로 닫기**(키보드 접근성) + 부드러운 **진입 애니메이션**(menu-in, reduced-motion 존중).
 - 영향: 항목 6·7 (인터랙션·접근성)
+
+### 회차 29 — WebSite 구조화 데이터
+- [lang] 레이아웃에 **WebSite JSON-LD**(name·url·inLanguage) 추가 → 전 페이지 site-wide. 구조화 데이터 세트 완성(WebSite·Organization·BreadcrumbList·Course).
+- 영향: SEO

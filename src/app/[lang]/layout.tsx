@@ -19,8 +19,20 @@ export default async function LangLayout({
 
   const dict = getDictionary(lang);
 
+  const websiteLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "SONCODING",
+    url: `https://all-my-projects-2026.github.io/SONCODING/${lang}/`,
+    inLanguage: lang,
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteLd) }}
+      />
       <a href="#main" className="skip-link">
         {lang === "en" ? "Skip to content" : "본문 바로가기"}
       </a>
