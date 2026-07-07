@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { HtmlLang } from "@/components/HtmlLang";
 import { getDictionary, isLocale, locales } from "@/lib/i18n";
 
 export function generateStaticParams() {
@@ -29,6 +30,7 @@ export default async function LangLayout({
 
   return (
     <>
+      <HtmlLang lang={lang} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteLd) }}
