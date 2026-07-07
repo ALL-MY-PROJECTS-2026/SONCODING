@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ArrowRight, Check } from "lucide-react";
+import { ArrowRight, Check } from "lucide-react";
 import { Container } from "@/components/Container";
 import { courses, getCourse } from "@/lib/content";
 import { getDictionary, isLocale, locales, type Locale } from "@/lib/i18n";
@@ -43,18 +43,45 @@ export default async function CourseDetailPage({
     { label: t.formatLabel, value: course.format[locale] },
   ];
 
+  const base = "https://all-my-projects-2026.github.io/SONCODING";
+  const breadcrumbLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: dict.nav.home, item: `${base}/${locale}/` },
+      { "@type": "ListItem", position: 2, name: dict.nav.education, item: `${base}/${locale}/education/` },
+      { "@type": "ListItem", position: 3, name: course.title[locale] },
+    ],
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+      />
       <section className="relative overflow-hidden border-b border-slate-200 bg-slate-50">
         <div className="bg-grid pointer-events-none absolute inset-0 opacity-60" />
         <Container className="relative py-14 sm:py-20">
-          <Link
-            href={`/${locale}/education`}
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-800"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            {dict.common.backToList}
-          </Link>
+          <nav aria-label="Breadcrumb">
+            <ol className="flex flex-wrap items-center gap-2 text-sm text-slate-500">
+              <li>
+                <Link href={`/${locale}`} className="hover:text-slate-800">
+                  {dict.nav.home}
+                </Link>
+              </li>
+              <li aria-hidden="true" className="text-slate-300">/</li>
+              <li>
+                <Link href={`/${locale}/education`} className="hover:text-slate-800">
+                  {dict.nav.education}
+                </Link>
+              </li>
+              <li aria-hidden="true" className="text-slate-300">/</li>
+              <li aria-current="page" className="font-medium text-slate-700">
+                {course.title[locale]}
+              </li>
+            </ol>
+          </nav>
           <div className="mt-5 flex flex-wrap gap-1.5">
             {course.tags.map((tag) => (
               <span

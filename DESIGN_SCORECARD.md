@@ -144,3 +144,8 @@
 - 가치 3종(정직함·실용성·함께 성장)에 **아이콘**(ShieldCheck·Wrench·HeartHandshake) 추가.
 - **"숫자로 보는" 통계 스트립**(홈 stats 재사용 + 카운트업) 추가 — 밋밋하던 About에 임팩트·리듬.
 - 영향: 항목 1·3 (레이아웃·모던)
+
+### 회차 23 — 과정 상세 breadcrumb + 구조화 데이터
+- 과정 상세 상단에 **breadcrumb**(홈 / IT 교육 / 과정명, `nav[aria-label]`·`aria-current`) 추가 — 기존 back 링크 대체.
+- **BreadcrumbList JSON-LD**(schema.org) 삽입 — 검색결과 경로 표시(SEO).
+- 영향: 항목 7 (접근성)·SEO
