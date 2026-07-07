@@ -29,7 +29,7 @@ export function Logo({
       i += 1;
       setText(full.slice(0, i));
       if (i >= full.length) clearInterval(id);
-    }, 105);
+    }, 200);
     return () => clearInterval(id);
   }, [animated, full]);
 
