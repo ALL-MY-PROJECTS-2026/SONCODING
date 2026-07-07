@@ -53,12 +53,28 @@ export default async function CourseDetailPage({
       { "@type": "ListItem", position: 3, name: course.title[locale] },
     ],
   };
+  const courseLd = {
+    "@context": "https://schema.org",
+    "@type": "Course",
+    name: course.title[locale],
+    description: course.summary[locale],
+    inLanguage: locale,
+    provider: {
+      "@type": "Organization",
+      name: "SONCODING",
+      url: `${base}/`,
+    },
+  };
 
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(courseLd) }}
       />
       <section className="relative overflow-hidden border-b border-slate-200 bg-slate-50">
         <div className="bg-grid pointer-events-none absolute inset-0 opacity-60" />

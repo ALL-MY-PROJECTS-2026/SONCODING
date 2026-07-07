@@ -157,3 +157,7 @@
 ### 회차 25 — 문의 성공 UX
 - 문의 성공 후 "다시 문의" 버튼이 아이콘만 있던 것 → **라벨 추가**("다시 문의하기"/"Send another")로 의미 명확화. 한/영.
 - 영향: 항목 6·7 (UX·접근성)
+
+### 회차 26 — Course 구조화 데이터
+- 과정 상세에 **Course JSON-LD**(schema.org: name·description·inLanguage·provider) 추가 — 검색결과 과정 정보 노출(breadcrumb·Organization 보완).
+- 영향: SEO
