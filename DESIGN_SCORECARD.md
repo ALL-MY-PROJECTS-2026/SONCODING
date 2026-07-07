@@ -135,3 +135,7 @@
 - `app/robots.ts` → robots.txt(전체 허용 + 사이트맵 참조).
 - 참고: GitHub Pages 프로젝트 경로라 robots.txt가 도메인 루트가 아닌 /SONCODING/robots.txt에 위치. 사이트맵은 Search Console에 전체 URL로 제출 가능.
 - 영향: SEO
+
+### 회차 21 — 교육 상세 관련 과정
+- 과정 상세 하단에 **"다른 과정도 살펴보세요"** 섹션 추가(현재 과정 제외, 3개 카드). 과정 간 탐색·크로스링크 개선.
+- 영향: 항목 1·10 (탐색·콘텐츠)

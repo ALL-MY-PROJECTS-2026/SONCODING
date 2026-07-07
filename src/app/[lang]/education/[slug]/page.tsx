@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Check } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 import { Container } from "@/components/Container";
 import { courses, getCourse } from "@/lib/content";
 import { getDictionary, isLocale, locales, type Locale } from "@/lib/i18n";
@@ -134,6 +134,45 @@ export default async function CourseDetailPage({
                 </Link>
               </div>
             </aside>
+          </div>
+        </Container>
+      </section>
+
+      {/* Related courses */}
+      <section className="border-t border-slate-200 bg-slate-50 py-16 sm:py-20">
+        <Container>
+          <h2 className="text-2xl font-bold tracking-tight text-slate-900">
+            {t.relatedTitle}
+          </h2>
+          <div className="mt-8 grid gap-6 md:grid-cols-3">
+            {courses
+              .filter((c) => c.slug !== course.slug)
+              .slice(0, 3)
+              .map((c) => (
+                <Link
+                  key={c.slug}
+                  href={`/${locale}/education/${c.slug}`}
+                  className="group rounded-2xl border border-slate-200 bg-white p-6 transition-all hover:-translate-y-1 hover:border-blue-300 hover:shadow-lg hover:shadow-blue-100"
+                >
+                  <div className="flex flex-wrap gap-1.5">
+                    {c.tags.slice(0, 3).map((tag) => (
+                      <span
+                        key={tag}
+                        className="rounded-md bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                  <h3 className="mt-3 font-bold text-slate-900">
+                    {c.title[locale]}
+                  </h3>
+                  <span className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-blue-600">
+                    {dict.common.learnMore}
+                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  </span>
+                </Link>
+              ))}
           </div>
         </Container>
       </section>

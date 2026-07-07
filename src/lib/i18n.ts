@@ -98,6 +98,7 @@ const dictionaries = {
       levelLabel: "난이도",
       formatLabel: "진행 방식",
       coursesTitle: "교육 과정",
+      relatedTitle: "다른 과정도 살펴보세요",
       features: [
         { title: "현업 개발자 강사", desc: "이론만 아는 강사가 아니라, 실제로 제품을 만드는 개발자가 가르칩니다." },
         { title: "프로젝트 중심", desc: "모든 과정이 강의로 끝나지 않고 동작하는 결과물로 마무리됩니다." },
@@ -271,6 +272,7 @@ const dictionaries = {
       levelLabel: "Level",
       formatLabel: "Format",
       coursesTitle: "Courses",
+      relatedTitle: "Explore other courses",
       features: [
         { title: "Taught by real developers", desc: "Not lecturers who only know theory — developers who ship real products." },
         { title: "Project-driven", desc: "Every course ends with something that actually works, not just lectures." },
