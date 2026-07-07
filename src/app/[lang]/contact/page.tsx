@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Mail, Phone, MapPin, Clock, type LucideIcon } from "lucide-react";
+import { Mail, Phone, MapPin, Clock, ChevronDown, type LucideIcon } from "lucide-react";
 import { Container } from "@/components/Container";
 import { PageHeader } from "@/components/PageHeader";
 import { ContactForm } from "@/components/ContactForm";
@@ -85,6 +85,28 @@ export default async function ContactPage({
             <div className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-8">
               <ContactForm form={t.form} />
             </div>
+          </div>
+        </Container>
+      </section>
+
+      {/* FAQ */}
+      <section className="border-t border-slate-200 bg-slate-50 py-16 sm:py-20">
+        <Container>
+          <h2 className="reveal text-center text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+            {t.faqTitle}
+          </h2>
+          <div className="faq reveal mx-auto mt-10 max-w-2xl divide-y divide-slate-200 rounded-2xl border border-slate-200 bg-white px-5 sm:px-7">
+            {t.faq.map((item) => (
+              <details key={item.q} className="group py-1">
+                <summary className="flex cursor-pointer items-center justify-between gap-4 py-4 text-left font-medium text-slate-900">
+                  {item.q}
+                  <ChevronDown className="h-5 w-5 shrink-0 text-slate-400 transition-transform group-open:rotate-180" />
+                </summary>
+                <p className="pb-4 pr-8 leading-relaxed text-slate-600">
+                  {item.a}
+                </p>
+              </details>
+            ))}
           </div>
         </Container>
       </section>

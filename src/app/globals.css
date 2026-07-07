@@ -66,6 +66,14 @@ textarea:focus-visible,
   }
 }
 
+/* FAQ accordion — hide the native disclosure marker */
+.faq summary {
+  list-style: none;
+}
+.faq summary::-webkit-details-marker {
+  display: none;
+}
+
 /* Subtle grid backdrop used on hero/section accents */
 .bg-grid {
   background-image:
