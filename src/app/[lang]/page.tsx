@@ -28,16 +28,16 @@ export default async function HomePage({
         <div className="animate-float-glow pointer-events-none absolute top-40 -left-10 h-64 w-64 rounded-full bg-indigo-200/40 blur-3xl [animation-delay:-4s]" />
         <Container className="relative py-24 sm:py-32">
           <div className="max-w-3xl">
-            <span className="inline-flex items-center rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
+            <span className="hero-in hero-in-1 inline-flex items-center rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
               {t.badge}
             </span>
-            <h1 className="mt-6 whitespace-pre-line text-[2rem] font-bold leading-[1.15] tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
+            <h1 className="hero-in hero-in-2 text-gradient text-gradient-animate mt-6 whitespace-pre-line text-[2rem] font-bold leading-[1.15] tracking-tight sm:text-5xl lg:text-6xl">
               {t.heroTitle}
             </h1>
-            <p className="mt-5 max-w-2xl text-base leading-relaxed text-slate-600 sm:mt-6 sm:text-lg">
+            <p className="hero-in hero-in-3 mt-5 max-w-2xl text-base leading-relaxed text-slate-600 sm:mt-6 sm:text-lg">
               {t.heroDesc}
             </p>
-            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+            <div className="hero-in hero-in-4 mt-9 flex flex-col gap-3 sm:flex-row">
               <Link
                 href={`/${locale}/contact`}
                 className="rounded-full bg-blue-600 px-7 py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-blue-700"
