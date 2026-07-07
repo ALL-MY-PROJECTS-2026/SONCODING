@@ -21,9 +21,14 @@ export default async function LangLayout({
 
   return (
     <>
+      <a href="#main" className="skip-link">
+        {lang === "en" ? "Skip to content" : "본문 바로가기"}
+      </a>
       <div className="scroll-progress" aria-hidden="true" />
       <Header locale={lang} nav={dict.nav} />
-      <main className="flex-1">{children}</main>
+      <main id="main" className="flex-1">
+        {children}
+      </main>
       <Footer locale={lang} dict={dict} />
     </>
   );

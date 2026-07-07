@@ -23,6 +23,35 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Consistent keyboard focus ring across interactive elements */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+/* Skip-to-content link — hidden until focused */
+.skip-link {
+  position: absolute;
+  left: 12px;
+  top: -64px;
+  z-index: 100;
+  border-radius: 8px;
+  background: #2563eb;
+  padding: 8px 14px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #fff;
+  transition: top 0.2s ease;
+}
+.skip-link:focus {
+  top: 12px;
+}
+
 /* Terminal caret for the logo wordmark (blinks; steady under reduced motion) */
 @keyframes caret-blink {
   0%, 49% { opacity: 1; }
