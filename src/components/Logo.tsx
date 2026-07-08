@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import type { Locale } from "@/lib/i18n";
 
-// Localized wordmark: Korean shows 판다코딩, English shows PANDA_CODING.
-const BRAND: Record<Locale, string> = { ko: "판다코딩", en: "PANDA_CODING" };
+// Localized wordmark: Korean shows 포켓코딩, English shows POCKET_CODING.
+const BRAND: Record<Locale, string> = { ko: "포켓코딩", en: "POCKET_CODING" };
 
 // Simple panda face — white face with black ears, eye-patches and nose,
 // sitting on the blue brand tile.

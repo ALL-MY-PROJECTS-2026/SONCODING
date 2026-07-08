@@ -61,7 +61,7 @@ export default async function CourseDetailPage({
     inLanguage: locale,
     provider: {
       "@type": "Organization",
-      name: "PANDA_CODING",
+      name: "POCKET_CODING",
       url: `${base}/`,
     },
   };
