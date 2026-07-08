@@ -6,19 +6,22 @@ import type { Locale } from "@/lib/i18n";
 // Localized wordmark: Korean shows 포켓코딩, English shows POCKET_CODING.
 const BRAND: Record<Locale, string> = { ko: "포켓코딩", en: "POCKET_CODING" };
 
-// Simple panda face — white face with black ears, eye-patches and nose,
-// sitting on the blue brand tile.
-function PandaMark() {
+// Simple pocket mark — a shirt pocket outline (with a center flap notch)
+// in white on the blue brand tile.
+function PocketMark() {
   return (
-    <svg viewBox="0 0 44 44" className="h-6 w-6" aria-hidden="true">
-      <circle cx="13" cy="14" r="6.5" fill="#111827" />
-      <circle cx="31" cy="14" r="6.5" fill="#111827" />
-      <circle cx="22" cy="24" r="14" fill="#ffffff" />
-      <ellipse cx="16.5" cy="23" rx="3.6" ry="4.6" fill="#111827" />
-      <ellipse cx="27.5" cy="23" rx="3.6" ry="4.6" fill="#111827" />
-      <circle cx="16.7" cy="24" r="1.2" fill="#ffffff" />
-      <circle cx="27.3" cy="24" r="1.2" fill="#ffffff" />
-      <ellipse cx="22" cy="30" rx="2.6" ry="1.9" fill="#111827" />
+    <svg
+      viewBox="0 0 44 44"
+      className="h-6 w-6"
+      fill="none"
+      stroke="#ffffff"
+      strokeWidth={3.2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M12 15 v15 a3 3 0 0 0 3 3 h14 a3 3 0 0 0 3 -3 v-15" />
+      <path d="M12 15 h6 l4 5 l4 -5 h6" />
     </svg>
   );
 }
@@ -56,7 +59,7 @@ export function Logo({
         className="grid h-8 w-8 place-items-center rounded-lg bg-blue-600 text-white"
         aria-hidden="true"
       >
-        <PandaMark />
+        <PocketMark />
       </span>
       <span className="inline-flex items-center font-mono text-lg font-semibold tracking-tight text-current">
         <span>{text}</span>
