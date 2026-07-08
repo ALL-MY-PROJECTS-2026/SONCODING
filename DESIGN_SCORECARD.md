@@ -197,3 +197,7 @@
 ### 회차 35 — hreflang 대체 링크
 - 각 페이지에 **hreflang 대체 링크**(ko·en·x-default) 추가(AlternateLinks, 경로 대응). 검색엔진이 한/영 대응 페이지를 인식 → 다국어 SEO 완성(html lang·hreflang).
 - 영향: SEO
+
+### 회차 36 — "맨 위로" 버튼
+- 스크롤 시 나타나는 **back-to-top 플로팅 버튼**(BackToTop) 추가. aria-label(한/영), reduced-motion 시 즉시 스크롤. 긴 페이지 탐색 편의.
+- 영향: 항목 6·9 (인터랙션·모바일)

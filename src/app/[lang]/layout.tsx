@@ -3,6 +3,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { HtmlLang } from "@/components/HtmlLang";
 import { AlternateLinks } from "@/components/AlternateLinks";
+import { BackToTop } from "@/components/BackToTop";
 import { getDictionary, isLocale, locales } from "@/lib/i18n";
 
 export function generateStaticParams() {
@@ -46,6 +47,7 @@ export default async function LangLayout({
         {children}
       </main>
       <Footer locale={lang} dict={dict} />
+      <BackToTop label={lang === "en" ? "Back to top" : "맨 위로"} />
     </>
   );
 }
