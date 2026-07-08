@@ -56,7 +56,7 @@ export function PortfolioGrid({
             key={p.title.en}
             className="group overflow-hidden rounded-2xl border border-slate-200 bg-white transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-200"
           >
-            <div className="relative flex h-40 items-center justify-center bg-gradient-to-br from-slate-900 to-blue-800">
+            <div className="relative flex h-40 items-center justify-center bg-gradient-to-br from-slate-900 to-blue-800 transition-[filter] duration-300 group-hover:brightness-125">
               <div className="bg-grid absolute inset-0 opacity-30" />
               <span className="relative text-xs font-semibold uppercase tracking-widest text-blue-200">
                 {p.category[locale]}

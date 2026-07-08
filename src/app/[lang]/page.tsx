@@ -229,7 +229,7 @@ export default async function HomePage({
             {testimonials.map((item, i) => (
               <figure
                 key={i}
-                className={`reveal reveal-${(i % 3) + 1} flex flex-col rounded-2xl border border-slate-200 bg-white p-7`}
+                className={`reveal reveal-${(i % 3) + 1} flex flex-col rounded-2xl border border-slate-200 bg-white p-7 transition-all hover:-translate-y-1 hover:shadow-lg hover:shadow-slate-100`}
               >
                 <Quote className="h-8 w-8 text-blue-200" aria-hidden="true" />
                 <blockquote className="mt-4 flex-1 leading-relaxed text-slate-700">
