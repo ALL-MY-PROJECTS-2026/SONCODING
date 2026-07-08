@@ -31,19 +31,19 @@ const dictionaries = {
       badge: "IT 교육 · 소프트웨어 개발",
       heroTitle: "실무를 가르치고,\n제품을 만듭니다",
       heroDesc:
-        "SONCODING은 현장에서 통하는 IT 교육과 신뢰할 수 있는 소프트웨어 개발 외주를 함께 제공합니다. 배우는 곳이자, 만드는 곳입니다.",
+        "SONCODING은 10년 강의 경력의 IT 교육과, 필요한 것을 직접 만드는 소프트웨어 개발을 함께합니다. 배우는 곳이자, 만드는 곳입니다.",
       heroPrimary: "무료 상담 신청",
       heroSecondary: "서비스 둘러보기",
       statsTitle: "숫자로 보는 SONCODING",
       stats: [
         { value: "500+", label: "교육 수료생" },
         { value: "50+", label: "개발 프로젝트" },
-        { value: "10+", label: "년 현장 경력" },
+        { value: "10+", label: "년 강의 경력" },
         { value: "98%", label: "고객 만족도" },
       ],
       trustBadges: ["무료 상담", "1일 내 회신", "한·영 지원", "원격·방문 모두"],
       pillarsTitle: "두 개의 축, 하나의 팀",
-      pillarsDesc: "가르치는 사람이 곧 만드는 사람입니다. 현업 개발자가 직접 교육하고 개발합니다.",
+      pillarsDesc: "가르치고, 직접 만듭니다. 10년 강의 경력을 바탕으로 교육하고 개발합니다.",
       eduCardTitle: "IT 교육",
       eduCardDesc:
         "웹·앱 개발, 데이터, AI까지 실무 중심 커리큘럼. 프로젝트로 배우고 포트폴리오로 남깁니다.",
@@ -53,8 +53,8 @@ const dictionaries = {
       whyTitle: "왜 SONCODING인가",
       why: [
         {
-          title: "현업 개발자가 직접",
-          desc: "이론만 아는 강사가 아니라, 실제 제품을 만드는 개발자가 가르치고 개발합니다.",
+          title: "10년 강의 경력",
+          desc: "오래 가르쳐 온 노하우로 이해하기 쉽게 설명하고, 필요한 것은 직접 만듭니다.",
         },
         {
           title: "프로젝트 중심",
@@ -71,7 +71,7 @@ const dictionaries = {
     },
     about: {
       title: "회사소개",
-      subtitle: "가르치는 사람이 만드는 사람입니다",
+      subtitle: "가르치고, 직접 만듭니다",
       lead: "SONCODING은 IT 교육과 소프트웨어 개발을 함께하는 팀입니다. 우리는 배움과 실전이 분리되어서는 안 된다고 믿습니다.",
       missionTitle: "우리의 미션",
       missionDesc:
@@ -92,7 +92,7 @@ const dictionaries = {
     education: {
       title: "IT 교육",
       subtitle: "실무로 배우는 IT 커리큘럼",
-      lead: "현업 개발자가 설계한 프로젝트 중심 과정. 배운 것이 곧 포트폴리오가 됩니다.",
+      lead: "10년 강의 경력으로 설계한 프로젝트 중심 과정. 배운 것이 곧 포트폴리오가 됩니다.",
       curriculumTitle: "커리큘럼",
       targetTitle: "이런 분께 추천합니다",
       durationLabel: "교육 기간",
@@ -103,7 +103,7 @@ const dictionaries = {
       courseColLabel: "과정",
       relatedTitle: "다른 과정도 살펴보세요",
       features: [
-        { title: "현업 개발자 강사", desc: "이론만 아는 강사가 아니라, 실제로 제품을 만드는 개발자가 가르칩니다." },
+        { title: "10년 강의 경력", desc: "오래 가르쳐 온 전문 강사가 이해하기 쉽게 설명합니다." },
         { title: "프로젝트 중심", desc: "모든 과정이 강의로 끝나지 않고 동작하는 결과물로 마무리됩니다." },
         { title: "취업·실무 연계", desc: "수료 후 포트폴리오 정리부터 커리어까지 이어서 지원합니다." },
       ],
@@ -216,12 +216,12 @@ const dictionaries = {
       stats: [
         { value: "500+", label: "Graduates" },
         { value: "50+", label: "Projects delivered" },
-        { value: "10+", label: "Years in the field" },
+        { value: "10+", label: "Years teaching" },
         { value: "98%", label: "Client satisfaction" },
       ],
       trustBadges: ["Free consultation", "Reply within a day", "Korean & English", "Remote or on-site"],
       pillarsTitle: "Two pillars, one team",
-      pillarsDesc: "The people who teach are the people who build. Working developers run every class and every project.",
+      pillarsDesc: "We teach, and we build. Ten years of teaching experience behind every class and project.",
       eduCardTitle: "IT Education",
       eduCardDesc:
         "Web & app development, data, and AI — a hands-on curriculum. Learn by building, leave with a portfolio.",
@@ -231,8 +231,8 @@ const dictionaries = {
       whyTitle: "Why SONCODING",
       why: [
         {
-          title: "Taught by real developers",
-          desc: "Not lecturers who only know theory — developers who ship real products teach and build.",
+          title: "10 years of teaching",
+          desc: "Seasoned instructors explain things clearly, and build what's needed themselves.",
         },
         {
           title: "Project-driven",
@@ -249,7 +249,7 @@ const dictionaries = {
     },
     about: {
       title: "About",
-      subtitle: "The people who teach are the people who build",
+      subtitle: "We teach — and we build it too",
       lead: "SONCODING is a team that does both IT education and software development. We believe learning and real work should never be separate.",
       missionTitle: "Our mission",
       missionDesc:
@@ -270,7 +270,7 @@ const dictionaries = {
     education: {
       title: "IT Education",
       subtitle: "Learn IT by doing",
-      lead: "Project-driven courses designed by working developers. What you learn becomes your portfolio.",
+      lead: "Project-driven courses shaped by 10 years of teaching. What you learn becomes your portfolio.",
       curriculumTitle: "Curriculum",
       targetTitle: "Who it's for",
       durationLabel: "Duration",
@@ -281,7 +281,7 @@ const dictionaries = {
       courseColLabel: "Course",
       relatedTitle: "Explore other courses",
       features: [
-        { title: "Taught by real developers", desc: "Not lecturers who only know theory — developers who ship real products." },
+        { title: "10 years of teaching", desc: "Long-time instructors who explain clearly and build what's needed." },
         { title: "Project-driven", desc: "Every course ends with something that actually works, not just lectures." },
         { title: "Careers & real work", desc: "After finishing, we help with your portfolio and your career." },
       ],

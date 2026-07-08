@@ -325,8 +325,8 @@ export const testimonials: Testimonial[] = [
   },
   {
     quote: {
-      ko: "현업 개발자에게 배우니 실무 감각이 확실히 다릅니다.",
-      en: "Learning from working developers made a real difference in practical skills.",
+      ko: "복잡한 내용을 쉽게 풀어주셔서 끝까지 따라갈 수 있었어요.",
+      en: "Complex topics were explained so clearly that I could keep up the whole way.",
     },
     author: { ko: "이○○", en: "Ms. Lee" },
     role: { ko: "데이터 분석 수료생", en: "Data Analysis graduate" },
