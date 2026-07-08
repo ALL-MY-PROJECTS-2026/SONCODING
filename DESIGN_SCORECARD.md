@@ -201,3 +201,8 @@
 ### 회차 36 — "맨 위로" 버튼
 - 스크롤 시 나타나는 **back-to-top 플로팅 버튼**(BackToTop) 추가. aria-label(한/영), reduced-motion 시 즉시 스크롤. 긴 페이지 탐색 편의.
 - 영향: 항목 6·9 (인터랙션·모바일)
+
+### 회차 37 — 접근성·인쇄 CSS
+- **reduced-motion 시 smooth 스크롤 해제**(html scroll-behavior를 no-preference로 게이트, WCAG).
+- **print 스타일**: 인쇄 시 장식/애니메이션/고정 요소(진행바·오로라·캔버스·스킵링크·맨위로·sticky 헤더) 숨김.
+- 영향: 항목 7 (접근성)
