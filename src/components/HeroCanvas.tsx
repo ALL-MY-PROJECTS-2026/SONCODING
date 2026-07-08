@@ -221,15 +221,13 @@ export function HeroCanvas() {
       }
     };
 
-    // Pulse state. The front now sweeps along DEPTH (z): signals travel from the
-    // outer side (toward the camera) into the screen.
+    // Depth-sweep state: a front sweeps along z from the outer side (toward the
+    // camera) into the screen; each link extends inward as the front passes it.
     const DURATION = 2200; // ms for the front to sweep the full depth range
-    const TRAIL = 0.16; // bright pulse length behind the head, as a fraction of depth span
-    const AFTERGLOW = 0.3; // fraction of depth span over which a passed link fades out
-    const MINWIN = 2.5; // min depth window so links flat in z still get a travel beat
-    const C_HEAD = new THREE.Color(0x0ea5e9); // bright signal head
-    const C_TAIL = new THREE.Color(0x7dd3fc); // just behind the head
-    const C_GLOW = new THREE.Color(0x38bdf8); // freshly-lit link
+    const AFTERGLOW = 0.3; // depth-span fraction over which a finished link fades
+    const GROWWIN = 3.5; // depth units over which a link extends to full length
+    const C_HEAD = new THREE.Color(0x0ea5e9); // bright advancing tip
+    const C_GLOW = new THREE.Color(0x38bdf8); // settled, freshly-drawn link
     const C_BG = new THREE.Color(0xeaf2fb); // fades toward the light bg
     let waveStart = 0;
 
@@ -284,74 +282,57 @@ export function HeroCanvas() {
       if (pointerActive && sourceValid) {
         group.updateMatrixWorld(true);
         const front = ((now - waveStart) / DURATION) * maxDist;
-        const trailLen = maxDist * TRAIL;
         const glowSpan = maxDist * AFTERGLOW;
         for (let e = 0; e < edgeCount && seg < MAX_SEG; e++) {
           const a = edgeA[e];
           const b = edgeB[e];
           if (nodeDist[a] === Infinity && nodeDist[b] === Infinity) continue;
-          // Sweep along depth: the near endpoint is the OUTER one (larger z,
-          // toward the camera); the pulse travels from it into the screen.
+          // Outer endpoint = larger z (toward the camera). Each link is anchored
+          // at its outer node and EXTENDS inward (into the screen) as the depth
+          // front passes, so the network reaches out from the outside in and the
+          // segments always stay attached to their nodes (properly connected).
           const za = zWorld[a];
           const zb = zWorld[b];
-          const near = za >= zb ? a : b;
-          const far = za >= zb ? b : a;
-          const dNear = zOuter - (za >= zb ? za : zb);
-          const len = Math.max(Math.abs(za - zb), MINWIN);
-          const dFar = dNear + len;
-          if (front < dNear) continue; // signal hasn't reached this link yet
-          if (front - glowSpan > dFar) continue; // afterglow already faded out
+          const outer = za >= zb ? a : b;
+          const inner = za >= zb ? b : a;
+          const dOuter = zOuter - (za >= zb ? za : zb);
+          if (front < dOuter) continue; // front hasn't reached this link yet
+          const age = front - dOuter - GROWWIN; // <0 extending, ≥0 fully drawn
+          if (age > glowSpan) continue; // afterglow faded out
+          const grow = age < 0 ? (front - dOuter) / GROWWIN : 1; // 0→1 extension
           wpNear
-            .set(positions[near * 3], positions[near * 3 + 1], positions[near * 3 + 2])
+            .set(positions[outer * 3], positions[outer * 3 + 1], positions[outer * 3 + 2])
             .applyMatrix4(group.matrixWorld);
           wpFar
-            .set(positions[far * 3], positions[far * 3 + 1], positions[far * 3 + 2])
+            .set(positions[inner * 3], positions[inner * 3 + 1], positions[inner * 3 + 2])
             .applyMatrix4(group.matrixWorld);
+          const tipX = wpNear.x + (wpFar.x - wpNear.x) * grow;
+          const tipY = wpNear.y + (wpFar.y - wpNear.y) * grow;
+          const tipZ = wpNear.z + (wpFar.z - wpNear.z) * grow;
+          const gl = age < 0 ? 0 : age / glowSpan; // 0 fresh → 1 faded
+          // Settled colour for the outer end (and the tip once fully grown).
+          const sr = C_GLOW.r + (C_BG.r - C_GLOW.r) * gl;
+          const sg = C_GLOW.g + (C_BG.g - C_GLOW.g) * gl;
+          const sb = C_GLOW.b + (C_BG.b - C_GLOW.b) * gl;
+          // The advancing tip glows bright while the link is still extending.
+          const tr = age < 0 ? C_HEAD.r : sr;
+          const tg = age < 0 ? C_HEAD.g : sg;
+          const tb = age < 0 ? C_HEAD.b : sb;
+          const bo = depthBright(wpNear.z);
+          const bt = depthBright(tipZ);
           const o = seg * 6;
-          if (front <= dFar) {
-            // Bright signal currently travelling along this link (tail → head).
-            let tHead = (front - dNear) / len;
-            if (tHead > 1) tHead = 1;
-            let tTail = (front - trailLen - dNear) / len;
-            if (tTail < 0) tTail = 0;
-            const ztail = wpNear.z + (wpFar.z - wpNear.z) * tTail;
-            const zhead = wpNear.z + (wpFar.z - wpNear.z) * tHead;
-            const bt = depthBright(ztail);
-            const bh = depthBright(zhead);
-            linePositions[o] = wpNear.x + (wpFar.x - wpNear.x) * tTail;
-            linePositions[o + 1] = wpNear.y + (wpFar.y - wpNear.y) * tTail;
-            linePositions[o + 2] = ztail;
-            linePositions[o + 3] = wpNear.x + (wpFar.x - wpNear.x) * tHead;
-            linePositions[o + 4] = wpNear.y + (wpFar.y - wpNear.y) * tHead;
-            linePositions[o + 5] = zhead;
-            lineColors[o] = C_BG.r + (C_TAIL.r - C_BG.r) * bt;
-            lineColors[o + 1] = C_BG.g + (C_TAIL.g - C_BG.g) * bt;
-            lineColors[o + 2] = C_BG.b + (C_TAIL.b - C_BG.b) * bt;
-            lineColors[o + 3] = C_BG.r + (C_HEAD.r - C_BG.r) * bh;
-            lineColors[o + 4] = C_BG.g + (C_HEAD.g - C_BG.g) * bh;
-            lineColors[o + 5] = C_BG.b + (C_HEAD.b - C_BG.b) * bh;
-          } else {
-            // Signal has passed: the whole link glows, then fades to background,
-            // so the network reads as "filling in" behind the front.
-            const age = (front - dFar) / glowSpan; // 0 just lit → 1 faded
-            const r = C_GLOW.r + (C_BG.r - C_GLOW.r) * age;
-            const g = C_GLOW.g + (C_BG.g - C_GLOW.g) * age;
-            const bl = C_GLOW.b + (C_BG.b - C_GLOW.b) * age;
-            const bn = depthBright(wpNear.z);
-            const bf = depthBright(wpFar.z);
-            linePositions[o] = wpNear.x;
-            linePositions[o + 1] = wpNear.y;
-            linePositions[o + 2] = wpNear.z;
-            linePositions[o + 3] = wpFar.x;
-            linePositions[o + 4] = wpFar.y;
-            linePositions[o + 5] = wpFar.z;
-            lineColors[o] = C_BG.r + (r - C_BG.r) * bn;
-            lineColors[o + 1] = C_BG.g + (g - C_BG.g) * bn;
-            lineColors[o + 2] = C_BG.b + (bl - C_BG.b) * bn;
-            lineColors[o + 3] = C_BG.r + (r - C_BG.r) * bf;
-            lineColors[o + 4] = C_BG.g + (g - C_BG.g) * bf;
-            lineColors[o + 5] = C_BG.b + (bl - C_BG.b) * bf;
-          }
+          linePositions[o] = wpNear.x;
+          linePositions[o + 1] = wpNear.y;
+          linePositions[o + 2] = wpNear.z;
+          linePositions[o + 3] = tipX;
+          linePositions[o + 4] = tipY;
+          linePositions[o + 5] = tipZ;
+          lineColors[o] = C_BG.r + (sr - C_BG.r) * bo;
+          lineColors[o + 1] = C_BG.g + (sg - C_BG.g) * bo;
+          lineColors[o + 2] = C_BG.b + (sb - C_BG.b) * bo;
+          lineColors[o + 3] = C_BG.r + (tr - C_BG.r) * bt;
+          lineColors[o + 4] = C_BG.g + (tg - C_BG.g) * bt;
+          lineColors[o + 5] = C_BG.b + (tb - C_BG.b) * bt;
           seg++;
         }
       }
@@ -377,8 +358,8 @@ export function HeroCanvas() {
       group.rotation.y = spin + curX * 0.55;
       group.rotation.x = -curY * 0.4;
       if (pointerActive) {
-        // Re-emit the next pulse once the previous one's afterglow has faded.
-        if (!sourceValid || (now - waveStart) / DURATION > 1 + AFTERGLOW) emitFrom(now);
+        // Re-emit once the previous sweep (grow + afterglow) has fully faded.
+        if (!sourceValid || (now - waveStart) / DURATION > 1 + AFTERGLOW + 0.2) emitFrom(now);
       } else {
         sourceValid = false;
       }
