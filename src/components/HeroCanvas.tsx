@@ -221,10 +221,12 @@ export function HeroCanvas() {
       }
     };
 
-    // Pulse state.
-    const DURATION = 3400; // ms for the signal front to reach the farthest node (slow)
-    const TRAIL = 0.16; // bright pulse length behind the head, as a fraction of spread
-    const AFTERGLOW = 0.3; // fraction of spread over which a passed link fades out
+    // Pulse state. The front now sweeps along DEPTH (z): signals travel from the
+    // outer side (toward the camera) into the screen.
+    const DURATION = 2200; // ms for the front to sweep the full depth range
+    const TRAIL = 0.16; // bright pulse length behind the head, as a fraction of depth span
+    const AFTERGLOW = 0.3; // fraction of depth span over which a passed link fades out
+    const MINWIN = 2.5; // min depth window so links flat in z still get a travel beat
     const C_HEAD = new THREE.Color(0x0ea5e9); // bright signal head
     const C_TAIL = new THREE.Color(0x7dd3fc); // just behind the head
     const C_GLOW = new THREE.Color(0x38bdf8); // freshly-lit link
@@ -241,19 +243,29 @@ export function HeroCanvas() {
       const f = (DEPTH_FAR - (camZ - wz)) / (DEPTH_FAR - DEPTH_NEAR);
       return 0.2 + 0.8 * (f < 0 ? 0 : f > 1 ? 1 : f);
     };
-    let maxDist = 1;
+    let maxDist = 1; // depth span of the field (set per emit)
     let sourceValid = false;
+    const zWorld = new Float32Array(count); // world-space z of each node, per emit
+    let zOuter = 0; // z of the outermost node — the front starts here
 
-    // Pick the node nearest the cursor on screen and start a pulse from it.
+    // Pick the node nearest the cursor (to define the lit sub-network), snapshot
+    // node depths, and start a depth sweep from the outer side inward.
     const emitFrom = (now: number) => {
       group.updateMatrixWorld(true);
       const aspect = width / height;
       let src = 0;
       let bestD = Infinity;
+      let zMax = -Infinity;
+      let zMin = Infinity;
       for (let i = 0; i < count; i++) {
-        wp.set(positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2])
-          .applyMatrix4(group.matrixWorld)
-          .project(camera);
+        wp.set(positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2]).applyMatrix4(
+          group.matrixWorld,
+        );
+        const z = wp.z;
+        zWorld[i] = z;
+        if (z > zMax) zMax = z;
+        if (z < zMin) zMin = z;
+        wp.project(camera);
         const d = Math.hypot((wp.x - ndcX) * aspect, wp.y - ndcY);
         if (d < bestD) {
           bestD = d;
@@ -261,12 +273,8 @@ export function HeroCanvas() {
         }
       }
       computeWave(src);
-      let mx = 1;
-      for (let i = 0; i < count; i++) {
-        const dd = nodeDist[i];
-        if (dd !== Infinity && dd > mx) mx = dd;
-      }
-      maxDist = mx;
+      zOuter = zMax;
+      maxDist = Math.max(zMax - zMin, 1);
       waveStart = now;
       sourceValid = true;
     };
@@ -279,14 +287,17 @@ export function HeroCanvas() {
         const trailLen = maxDist * TRAIL;
         const glowSpan = maxDist * AFTERGLOW;
         for (let e = 0; e < edgeCount && seg < MAX_SEG; e++) {
-          const da = nodeDist[edgeA[e]];
-          const db = nodeDist[edgeB[e]];
-          if (da === Infinity && db === Infinity) continue;
-          // Orient the edge outward: near endpoint is closer to the source.
-          const near = da <= db ? edgeA[e] : edgeB[e];
-          const far = da <= db ? edgeB[e] : edgeA[e];
-          const dNear = da <= db ? da : db;
-          const len = edgeLen[e];
+          const a = edgeA[e];
+          const b = edgeB[e];
+          if (nodeDist[a] === Infinity && nodeDist[b] === Infinity) continue;
+          // Sweep along depth: the near endpoint is the OUTER one (larger z,
+          // toward the camera); the pulse travels from it into the screen.
+          const za = zWorld[a];
+          const zb = zWorld[b];
+          const near = za >= zb ? a : b;
+          const far = za >= zb ? b : a;
+          const dNear = zOuter - (za >= zb ? za : zb);
+          const len = Math.max(Math.abs(za - zb), MINWIN);
           const dFar = dNear + len;
           if (front < dNear) continue; // signal hasn't reached this link yet
           if (front - glowSpan > dFar) continue; // afterglow already faded out
