@@ -2,9 +2,6 @@
 
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
-import { LineSegments2 } from "three/addons/lines/LineSegments2.js";
-import { LineSegmentsGeometry } from "three/addons/lines/LineSegmentsGeometry.js";
-import { LineMaterial } from "three/addons/lines/LineMaterial.js";
 
 // Soft round sprite so points render as glowing dots rather than squares.
 function makeDotTexture(): THREE.CanvasTexture {
@@ -37,8 +34,8 @@ type Meteor = {
 
 /**
  * Generated three.js hero background — zero external assets (no copyright):
- * a gently rotating particle field with meteors streaking in from outside and
- * falling inward (down + into the screen). Not interactive. Respects
+ * a gently rotating particle field with meteors — trails of glowing dots that
+ * converge inward toward the centre. Not interactive. Respects
  * prefers-reduced-motion (static frame), pauses when scrolled out of view, and
  * cleans up fully.
  */
@@ -101,27 +98,58 @@ export function HeroCanvas() {
     group.add(new THREE.Points(geometry, material));
     scene.add(group);
 
-    // ── Meteors: fat-line streaks with world-unit thickness (3D perspective) ─
-    const METEORS = width < 640 ? 8 : 14;
-    const meteorPos = new Float32Array(METEORS * 2 * 3);
-    const meteorCol = new Float32Array(METEORS * 2 * 3);
-    const meteorGeo = new LineSegmentsGeometry();
-    const meteorMat = new LineMaterial({
-      vertexColors: true,
-      worldUnits: true,
-      linewidth: 0.18,
+    // ── Meteors: a trail of glowing DOTS streaking inward to the centre ──────
+    const METEORS = width < 640 ? 8 : 13;
+    const DPM = 11; // dots per meteor trail
+    const maxDots = METEORS * DPM;
+    const meteorPos = new Float32Array(maxDots * 3);
+    const meteorCol = new Float32Array(maxDots * 3);
+    const meteorSize = new Float32Array(maxDots);
+    const meteorGeo = new THREE.BufferGeometry();
+    const mPosAttr = new THREE.BufferAttribute(meteorPos, 3).setUsage(THREE.DynamicDrawUsage);
+    const mColAttr = new THREE.BufferAttribute(meteorCol, 3).setUsage(THREE.DynamicDrawUsage);
+    const mSizeAttr = new THREE.BufferAttribute(meteorSize, 1).setUsage(THREE.DynamicDrawUsage);
+    meteorGeo.setAttribute("position", mPosAttr);
+    meteorGeo.setAttribute("color", mColAttr);
+    meteorGeo.setAttribute("size", mSizeAttr);
+    meteorGeo.setDrawRange(0, 0);
+    // Custom point shader so each dot has its OWN size — a big bright head that
+    // tapers to small faint tail dots (a comet of points), with depth scaling.
+    const pr = Math.min(2, window.devicePixelRatio || 1);
+    const meteorMat = new THREE.ShaderMaterial({
+      uniforms: { uTex: { value: texture }, uScale: { value: height * 0.5 * pr } },
       transparent: true,
-      opacity: 0.95,
       depthTest: false,
       depthWrite: false,
+      blending: THREE.NormalBlending,
+      vertexShader: `
+        attribute float size;
+        attribute vec3 color;
+        varying vec3 vColor;
+        uniform float uScale;
+        void main() {
+          vColor = color;
+          vec4 mv = modelViewMatrix * vec4(position, 1.0);
+          gl_PointSize = size * (uScale / max(-mv.z, 0.1));
+          gl_Position = projectionMatrix * mv;
+        }
+      `,
+      fragmentShader: `
+        uniform sampler2D uTex;
+        varying vec3 vColor;
+        void main() {
+          float a = texture2D(uTex, gl_PointCoord).a;
+          if (a < 0.01) discard;
+          gl_FragColor = vec4(vColor, a);
+        }
+      `,
     });
-    meteorMat.resolution.set(width, height);
-    const meteorLines = new LineSegments2(meteorGeo, meteorMat);
-    meteorLines.frustumCulled = false;
-    scene.add(meteorLines);
+    const meteorDots = new THREE.Points(meteorGeo, meteorMat);
+    meteorDots.frustumCulled = false;
+    scene.add(meteorDots);
 
     const C_HEAD = new THREE.Color(0x0ea5e9); // bright meteor head (sky-500)
-    const C_TAIL = new THREE.Color(0xeaf2fb); // tail fades toward the light bg
+    const C_TAIL = new THREE.Color(0xeaf2fb); // tail dots fade toward the light bg
 
     // Depth cue: brighter/crisper when closer to the camera.
     const camZ = camera.position.z;
@@ -168,7 +196,7 @@ export function HeroCanvas() {
     let last = -1;
 
     const drawMeteors = (dt: number) => {
-      let seg = 0;
+      let d = 0; // dot index
       for (let i = 0; i < METEORS; i++) {
         const m = meteors[i];
         if (m.delay > 0) {
@@ -182,37 +210,39 @@ export function HeroCanvas() {
         const fx = m.x - FOCUS.x;
         const fy = m.y - FOCUS.y;
         const fz = m.z - FOCUS.z;
-        if (fx * fx + fy * fy + fz * fz < 49 || m.y < -20) {
-          spawn(m, Math.random() * 1);
+        if (fx * fx + fy * fy + fz * fz < 36 || m.y < -20) {
+          spawn(m, Math.random() * 0.9);
           continue;
         }
-        const tailX = m.x - m.dx * m.len;
-        const tailY = m.y - m.dy * m.len;
-        const tailZ = m.z - m.dz * m.len;
-        const bh = depthBright(m.z);
-        const o = seg * 6;
-        // tail vertex (faded → bg)
-        meteorPos[o] = tailX;
-        meteorPos[o + 1] = tailY;
-        meteorPos[o + 2] = tailZ;
-        meteorCol[o] = C_TAIL.r;
-        meteorCol[o + 1] = C_TAIL.g;
-        meteorCol[o + 2] = C_TAIL.b;
-        // head vertex (bright)
-        meteorPos[o + 3] = m.x;
-        meteorPos[o + 4] = m.y;
-        meteorPos[o + 5] = m.z;
-        meteorCol[o + 3] = C_TAIL.r + (C_HEAD.r - C_TAIL.r) * bh;
-        meteorCol[o + 4] = C_TAIL.g + (C_HEAD.g - C_TAIL.g) * bh;
-        meteorCol[o + 5] = C_TAIL.b + (C_HEAD.b - C_TAIL.b) * bh;
-        seg++;
+        // Lay the trail as a line of dots behind the head; each dot fades toward
+        // the tail so it reads as a comet of points heading inward.
+        const step = m.len / (DPM - 1);
+        for (let j = 0; j < DPM; j++) {
+          const px = m.x - m.dx * step * j;
+          const py = m.y - m.dy * step * j;
+          const pz = m.z - m.dz * step * j;
+          const o = d * 3;
+          meteorPos[o] = px;
+          meteorPos[o + 1] = py;
+          meteorPos[o + 2] = pz;
+          const head = 1 - j / (DPM - 1); // 1 at head → 0 at tail
+          // Bright head dot tapering to small faint tail dots.
+          meteorSize[d] = 0.25 + head * head * 1.5;
+          const b = depthBright(pz) * (0.25 + head * 0.75);
+          meteorCol[o] = C_TAIL.r + (C_HEAD.r - C_TAIL.r) * b;
+          meteorCol[o + 1] = C_TAIL.g + (C_HEAD.g - C_TAIL.g) * b;
+          meteorCol[o + 2] = C_TAIL.b + (C_HEAD.b - C_TAIL.b) * b;
+          d++;
+        }
       }
-      if (seg === 0) {
-        meteorLines.visible = false;
+      if (d === 0) {
+        meteorDots.visible = false;
       } else {
-        meteorLines.visible = true;
-        meteorGeo.setPositions(meteorPos.subarray(0, seg * 6));
-        meteorGeo.setColors(meteorCol.subarray(0, seg * 6));
+        meteorDots.visible = true;
+        meteorGeo.setDrawRange(0, d);
+        mPosAttr.needsUpdate = true;
+        mColAttr.needsUpdate = true;
+        mSizeAttr.needsUpdate = true;
       }
     };
 
@@ -263,7 +293,7 @@ export function HeroCanvas() {
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
       renderer.setSize(width, height);
-      meteorMat.resolution.set(width, height);
+      meteorMat.uniforms.uScale.value = height * 0.5 * pr;
       render();
     };
     window.addEventListener("resize", onResize);
