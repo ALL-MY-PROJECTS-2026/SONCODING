@@ -2,6 +2,9 @@
 
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
+import { LineSegments2 } from "three/addons/lines/LineSegments2.js";
+import { LineSegmentsGeometry } from "three/addons/lines/LineSegmentsGeometry.js";
+import { LineMaterial } from "three/addons/lines/LineMaterial.js";
 
 // Soft round sprite so points render as glowing dots rather than squares.
 function makeDotTexture(): THREE.CanvasTexture {
@@ -79,22 +82,19 @@ export function HeroCanvas() {
     const MAX_SEG = 600;
     const linePositions = new Float32Array(MAX_SEG * 2 * 3);
     const lineColors = new Float32Array(MAX_SEG * 2 * 3);
-    const lineGeometry = new THREE.BufferGeometry();
-    const linePosAttr = new THREE.BufferAttribute(linePositions, 3).setUsage(
-      THREE.DynamicDrawUsage,
-    );
-    const lineColAttr = new THREE.BufferAttribute(lineColors, 3).setUsage(
-      THREE.DynamicDrawUsage,
-    );
-    lineGeometry.setAttribute("position", linePosAttr);
-    lineGeometry.setAttribute("color", lineColAttr);
-    lineGeometry.setDrawRange(0, 0);
-    const lineMaterial = new THREE.LineBasicMaterial({
+    // Fat lines (LineSegments2) with world-unit thickness, so links get real
+    // 3D perspective — near links render thick, far links thin.
+    const lineGeometry = new LineSegmentsGeometry();
+    const lineMaterial = new LineMaterial({
       vertexColors: true,
+      worldUnits: true,
+      linewidth: 0.16,
       transparent: true,
-      opacity: 0.9,
+      opacity: 0.95,
+      depthTest: false,
       depthWrite: false,
     });
+    lineMaterial.resolution.set(width, height);
 
     const texture = makeDotTexture();
     const material = new THREE.PointsMaterial({
@@ -114,7 +114,7 @@ export function HeroCanvas() {
 
     // Pulse segments are computed in world space (endpoints ride the rotating
     // field), so the LineSegments lives in the scene root, not the group.
-    const lineSegments = new THREE.LineSegments(lineGeometry, lineMaterial);
+    const lineSegments = new LineSegments2(lineGeometry, lineMaterial);
     lineSegments.frustumCulled = false;
     scene.add(lineSegments);
 
@@ -344,9 +344,13 @@ export function HeroCanvas() {
           seg++;
         }
       }
-      lineGeometry.setDrawRange(0, seg * 2);
-      linePosAttr.needsUpdate = true;
-      lineColAttr.needsUpdate = true;
+      if (seg === 0) {
+        lineSegments.visible = false;
+      } else {
+        lineSegments.visible = true;
+        lineGeometry.setPositions(linePositions.subarray(0, seg * 6));
+        lineGeometry.setColors(lineColors.subarray(0, seg * 6));
+      }
     };
 
     const render = () => renderer.render(scene, camera);
@@ -400,6 +404,7 @@ export function HeroCanvas() {
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
       renderer.setSize(width, height);
+      lineMaterial.resolution.set(width, height);
       render();
     };
     window.addEventListener("resize", onResize);
