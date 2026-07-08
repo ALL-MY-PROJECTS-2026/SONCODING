@@ -122,7 +122,10 @@ export default async function HomePage({
       <section className="py-20 sm:py-24">
         <Container>
           <div className="reveal mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-slate-900">
+            <p className="text-sm font-semibold uppercase tracking-widest text-blue-600">
+              {t.pillarsEyebrow}
+            </p>
+            <h2 className="mt-2 text-3xl font-bold tracking-tight text-slate-900">
               {t.pillarsTitle}
             </h2>
             <p className="mt-4 text-slate-600">{t.pillarsDesc}</p>
@@ -181,9 +184,14 @@ export default async function HomePage({
       {/* Why */}
       <section className="border-t border-slate-200 bg-slate-50 py-20 sm:py-24">
         <Container>
-          <h2 className="reveal text-center text-3xl font-bold tracking-tight text-slate-900">
-            {t.whyTitle}
-          </h2>
+          <div className="reveal text-center">
+            <p className="text-sm font-semibold uppercase tracking-widest text-blue-600">
+              {t.whyEyebrow}
+            </p>
+            <h2 className="mt-2 text-3xl font-bold tracking-tight text-slate-900">
+              {t.whyTitle}
+            </h2>
+          </div>
           <div className="mt-12 grid gap-8 md:grid-cols-3">
             {t.why.map((w, i) => {
               const Icon = whyIcons[i] ?? UserCheck;
@@ -209,9 +217,14 @@ export default async function HomePage({
       {/* Testimonials */}
       <section className="border-t border-slate-200 py-20 sm:py-24">
         <Container>
-          <h2 className="reveal text-center text-3xl font-bold tracking-tight text-slate-900">
-            {t.testimonialsTitle}
-          </h2>
+          <div className="reveal text-center">
+            <p className="text-sm font-semibold uppercase tracking-widest text-blue-600">
+              {t.testimonialsEyebrow}
+            </p>
+            <h2 className="mt-2 text-3xl font-bold tracking-tight text-slate-900">
+              {t.testimonialsTitle}
+            </h2>
+          </div>
           <div className="mt-12 grid gap-6 md:grid-cols-3">
             {testimonials.map((item, i) => (
               <figure

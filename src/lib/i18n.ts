@@ -42,6 +42,7 @@ const dictionaries = {
         { value: "98%", label: "고객 만족도" },
       ],
       trustBadges: ["무료 상담", "1일 내 회신", "한·영 지원", "원격·방문 모두"],
+      pillarsEyebrow: "서비스",
       pillarsTitle: "두 개의 축, 하나의 팀",
       pillarsDesc: "가르치고, 직접 만듭니다. 10년 강의 경력을 바탕으로 교육하고 개발합니다.",
       eduCardTitle: "IT 교육",
@@ -50,6 +51,7 @@ const dictionaries = {
       devCardTitle: "개발 외주",
       devCardDesc:
         "웹사이트부터 업무 자동화, 맞춤형 솔루션까지. 기획-개발-운영을 함께합니다.",
+      whyEyebrow: "강점",
       whyTitle: "왜 포켓코딩인가",
       why: [
         {
@@ -65,6 +67,7 @@ const dictionaries = {
           desc: "교육 수료 후 취업·실무까지, 개발 프로젝트는 출시 후 운영까지 지원합니다.",
         },
       ],
+      testimonialsEyebrow: "후기",
       testimonialsTitle: "수강생·고객의 목소리",
       ctaTitle: "무엇을 만들고 싶으신가요?",
       ctaDesc: "교육 문의든 개발 의뢰든, 편하게 남겨주세요. 영업일 기준 1일 내 회신드립니다.",
@@ -222,6 +225,7 @@ const dictionaries = {
         { value: "98%", label: "Client satisfaction" },
       ],
       trustBadges: ["Free consultation", "Reply within a day", "Korean & English", "Remote or on-site"],
+      pillarsEyebrow: "What we do",
       pillarsTitle: "Two pillars, one team",
       pillarsDesc: "We teach, and we build. Ten years of teaching experience behind every class and project.",
       eduCardTitle: "IT Education",
@@ -230,6 +234,7 @@ const dictionaries = {
       devCardTitle: "Software Development",
       devCardDesc:
         "From websites to workflow automation and custom solutions — planning, building, and running it with you.",
+      whyEyebrow: "Why us",
       whyTitle: "Why POCKET_CODING",
       why: [
         {
@@ -245,6 +250,7 @@ const dictionaries = {
           desc: "We support careers after courses, and operations after launch.",
         },
       ],
+      testimonialsEyebrow: "Testimonials",
       testimonialsTitle: "What people say",
       ctaTitle: "What would you like to build?",
       ctaDesc: "Whether it's a course or a project, just drop us a line. We reply within one business day.",
