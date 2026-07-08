@@ -181,6 +181,8 @@ export function ContactForm({ form }: { form: Dictionary["contact"]["form"] }) {
         {status !== "submitting" && <Send className="h-4 w-4" />}
         {status === "submitting" ? form.submitting : form.submit}
       </button>
+
+      <p className="text-xs leading-relaxed text-slate-400">{form.privacyNotice}</p>
     </form>
   );
 }

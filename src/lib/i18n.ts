@@ -178,6 +178,8 @@ const dictionaries = {
         errorDesc: "잠시 후 다시 시도하시거나 이메일로 연락 주세요.",
         required: "필수 항목입니다.",
         invalidEmail: "올바른 이메일 형식이 아닙니다.",
+        privacyNotice:
+          "제출 시 문의 처리를 위해 이름·이메일이 수집되며, 처리 완료 후 안전하게 파기됩니다.",
       },
     },
     footer: {
@@ -356,6 +358,8 @@ const dictionaries = {
         errorDesc: "Please try again in a moment, or email us directly.",
         required: "This field is required.",
         invalidEmail: "Please enter a valid email address.",
+        privacyNotice:
+          "By submitting, your name and email are collected to handle your inquiry and safely deleted once it's resolved.",
       },
     },
     footer: {
