@@ -71,6 +71,48 @@ export function HeroCanvas() {
     geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
     geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
 
+    // Subtle 3D network mesh: connect nearby points with thin lines. Computed
+    // once — points are static in local space, only the group rotates, so the
+    // links tilt/rotate in 3D with the field. Degree is capped so the web stays
+    // airy rather than busy.
+    const linePos: number[] = [];
+    const lineCol: number[] = [];
+    const degree = new Int16Array(count);
+    const TH = width < 640 ? 5 : 4.4;
+    const TH2 = TH * TH;
+    const MAXDEG = 3;
+    for (let i = 0; i < count; i++) {
+      if (degree[i] >= MAXDEG) continue;
+      for (let j = i + 1; j < count; j++) {
+        if (degree[i] >= MAXDEG) break;
+        if (degree[j] >= MAXDEG) continue;
+        const dx = positions[i * 3] - positions[j * 3];
+        const dy = positions[i * 3 + 1] - positions[j * 3 + 1];
+        const dz = positions[i * 3 + 2] - positions[j * 3 + 2];
+        if (dx * dx + dy * dy + dz * dz < TH2) {
+          linePos.push(
+            positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2],
+            positions[j * 3], positions[j * 3 + 1], positions[j * 3 + 2],
+          );
+          lineCol.push(
+            colors[i * 3], colors[i * 3 + 1], colors[i * 3 + 2],
+            colors[j * 3], colors[j * 3 + 1], colors[j * 3 + 2],
+          );
+          degree[i]++;
+          degree[j]++;
+        }
+      }
+    }
+    const lineGeometry = new THREE.BufferGeometry();
+    lineGeometry.setAttribute("position", new THREE.BufferAttribute(new Float32Array(linePos), 3));
+    lineGeometry.setAttribute("color", new THREE.BufferAttribute(new Float32Array(lineCol), 3));
+    const lineMaterial = new THREE.LineBasicMaterial({
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.32,
+      depthWrite: false,
+    });
+
     const texture = makeDotTexture();
     const material = new THREE.PointsMaterial({
       size: 0.55,
@@ -84,6 +126,8 @@ export function HeroCanvas() {
     });
 
     const group = new THREE.Group();
+    // Lines first so the glowing dots render on top of the mesh.
+    group.add(new THREE.LineSegments(lineGeometry, lineMaterial));
     group.add(new THREE.Points(geometry, material));
     scene.add(group);
 
@@ -160,6 +204,8 @@ export function HeroCanvas() {
       window.removeEventListener("pointermove", onPointerMove);
       geometry.dispose();
       material.dispose();
+      lineGeometry.dispose();
+      lineMaterial.dispose();
       texture.dispose();
       renderer.dispose();
       if (renderer.domElement.parentNode) {
