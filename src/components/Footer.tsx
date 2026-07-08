@@ -71,8 +71,13 @@ export function Footer({
           </div>
         </div>
 
-        <div className="mt-12 border-t border-slate-800 pt-6 text-xs text-slate-500">
-          © {`${site.name}. ${dict.footer.rights}`}
+        <div className="mt-12 space-y-2 border-t border-slate-800 pt-6 text-xs text-slate-500">
+          <p>
+            {locale === "en"
+              ? `${site.name} · CEO ${site.business.ceo} · Biz. Reg. ${site.business.regNumber}`
+              : `상호 ${site.name} · 대표 ${site.business.ceo} · 사업자등록번호 ${site.business.regNumber}`}
+          </p>
+          <p>© {`${site.name}. ${dict.footer.rights}`}</p>
         </div>
       </Container>
     </footer>

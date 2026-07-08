@@ -20,6 +20,11 @@ export const site = {
     ko: "평일 09:00 – 18:00 (주말·공휴일 휴무)",
     en: "Weekdays 09:00 – 18:00 (KST)",
   },
+  // Legal / business info (⚠️ placeholders — replace with real values)
+  business: {
+    ceo: "○○○",
+    regNumber: "000-00-00000",
+  },
   social: {
     github: "",
     instagram: "",
