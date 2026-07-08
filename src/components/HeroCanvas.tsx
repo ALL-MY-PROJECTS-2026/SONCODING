@@ -22,9 +22,9 @@ const PALETTE = [0x60a5fa, 0x818cf8, 0x22d3ee, 0xa78bfa];
 
 /**
  * Generated three.js hero background — zero external assets (no copyright): a
- * gently rotating field of glowing particles. Not interactive. Respects
- * prefers-reduced-motion (static frame), pauses when scrolled out of view, and
- * cleans up fully.
+ * gently rotating field of glowing particles that parallax-tilts toward the
+ * pointer while it hovers the banner. Respects prefers-reduced-motion (static
+ * frame), pauses when scrolled out of view, and cleans up fully.
  */
 export function HeroCanvas() {
   const mountRef = useRef<HTMLDivElement>(null);
@@ -88,6 +88,31 @@ export function HeroCanvas() {
     let visible = true;
     let last = -1;
 
+    // Pointer parallax: the field tilts toward the cursor while it's over the
+    // banner (smoothly eased), on top of a slow auto-rotation.
+    let pointerX = 0;
+    let pointerY = 0;
+    let curX = 0;
+    let curY = 0;
+    let spin = 0;
+
+    const onPointerMove = (e: PointerEvent) => {
+      const r = mount.getBoundingClientRect();
+      const inside =
+        e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+      if (inside) {
+        pointerX = ((e.clientX - r.left) / r.width) * 2 - 1;
+        pointerY = ((e.clientY - r.top) / r.height) * 2 - 1;
+      } else {
+        pointerX = 0;
+        pointerY = 0;
+      }
+    };
+    const onWinBlur = () => {
+      pointerX = 0;
+      pointerY = 0;
+    };
+
     const render = () => renderer.render(scene, camera);
 
     const animate = (ts?: number) => {
@@ -96,8 +121,11 @@ export function HeroCanvas() {
       if (last < 0) last = now;
       const dt = Math.min((now - last) / 1000, 0.05);
       last = now;
-      group.rotation.y += dt * 0.05;
-      group.rotation.x = Math.sin(group.rotation.y * 0.5) * 0.08;
+      curX += (pointerX - curX) * 0.05;
+      curY += (pointerY - curY) * 0.05;
+      spin += dt * 0.05;
+      group.rotation.y = spin + curX * 0.5;
+      group.rotation.x = curY * 0.35;
       render();
       rafId = requestAnimationFrame(animate);
     };
@@ -105,6 +133,8 @@ export function HeroCanvas() {
     if (reduce) {
       render();
     } else {
+      window.addEventListener("pointermove", onPointerMove, { passive: true });
+      window.addEventListener("blur", onWinBlur);
       animate();
     }
 
@@ -137,6 +167,8 @@ export function HeroCanvas() {
       cancelAnimationFrame(rafId);
       io.disconnect();
       window.removeEventListener("resize", onResize);
+      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("blur", onWinBlur);
       geometry.dispose();
       material.dispose();
       texture.dispose();
