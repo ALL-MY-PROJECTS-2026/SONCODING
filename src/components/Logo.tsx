@@ -61,12 +61,19 @@ export function Logo({
       >
         <PocketMark />
       </span>
-      <span className="inline-flex items-center font-mono text-lg font-semibold tracking-tight text-current">
-        <span>{text}</span>
-        <span
-          aria-hidden="true"
-          className="caret ml-[3px] inline-block h-[1.05em] w-[3px] bg-current"
-        />
+      <span className="relative inline-flex items-center font-mono text-lg font-semibold tracking-tight text-current">
+        {/* Sizer: reserves the full wordmark width so the typing animation
+            can't reflow the header (keeps the right-side nav fixed). */}
+        <span aria-hidden="true" className="invisible whitespace-pre">
+          {full}
+        </span>
+        <span className="absolute inset-y-0 left-0 inline-flex items-center whitespace-pre">
+          <span>{text}</span>
+          <span
+            aria-hidden="true"
+            className="caret ml-[3px] inline-block h-[1.05em] w-[3px] bg-current"
+          />
+        </span>
       </span>
       <span className="sr-only">{BRAND[locale]}</span>
     </span>
