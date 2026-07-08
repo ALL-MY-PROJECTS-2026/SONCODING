@@ -1,6 +1,6 @@
 // Centralized brand / company info. Change values here to rebrand the whole site.
 export const site = {
-  name: "SONCODING",
+  name: "PANDA_CODING",
   // Short tagline shown near the logo / in metadata
   tagline: {
     ko: "IT 교육과 소프트웨어 개발을 한 곳에서",

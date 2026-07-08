@@ -61,7 +61,7 @@ export default async function CourseDetailPage({
     inLanguage: locale,
     provider: {
       "@type": "Organization",
-      name: "SONCODING",
+      name: "PANDA_CODING",
       url: `${base}/`,
     },
   };

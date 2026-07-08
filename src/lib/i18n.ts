@@ -31,10 +31,10 @@ const dictionaries = {
       badge: "IT 교육 · 소프트웨어 개발",
       heroTitle: "실무를 가르치고,\n제품을 만듭니다",
       heroDesc:
-        "SONCODING은 10년 강의 경력의 IT 교육과, 필요한 것을 직접 만드는 소프트웨어 개발을 함께합니다. 배우는 곳이자, 만드는 곳입니다.",
+        "판다코딩은 10년 강의 경력의 IT 교육과, 필요한 것을 직접 만드는 소프트웨어 개발을 함께합니다. 배우는 곳이자, 만드는 곳입니다.",
       heroPrimary: "무료 상담 신청",
       heroSecondary: "서비스 둘러보기",
-      statsTitle: "숫자로 보는 SONCODING",
+      statsTitle: "숫자로 보는 판다코딩",
       stats: [
         { value: "500+", label: "교육 수료생" },
         { value: "50+", label: "개발 프로젝트" },
@@ -50,7 +50,7 @@ const dictionaries = {
       devCardTitle: "개발 외주",
       devCardDesc:
         "웹사이트부터 업무 자동화, 맞춤형 솔루션까지. 기획-개발-운영을 함께합니다.",
-      whyTitle: "왜 SONCODING인가",
+      whyTitle: "왜 판다코딩인가",
       why: [
         {
           title: "10년 강의 경력",
@@ -72,7 +72,7 @@ const dictionaries = {
     about: {
       title: "회사소개",
       subtitle: "가르치고, 직접 만듭니다",
-      lead: "SONCODING은 IT 교육과 소프트웨어 개발을 함께하는 팀입니다. 우리는 배움과 실전이 분리되어서는 안 된다고 믿습니다.",
+      lead: "판다코딩은 IT 교육과 소프트웨어 개발을 함께하는 팀입니다. 우리는 배움과 실전이 분리되어서는 안 된다고 믿습니다.",
       missionTitle: "우리의 미션",
       missionDesc:
         "누구나 기술로 문제를 해결할 수 있도록 돕습니다. 배우려는 사람에게는 실무 역량을, 만들려는 사람에게는 신뢰할 수 있는 파트너를 제공합니다.",
@@ -211,10 +211,10 @@ const dictionaries = {
       badge: "IT Education · Software Development",
       heroTitle: "We teach the craft,\nand build the product",
       heroDesc:
-        "SONCODING pairs practical IT education with dependable software development. A place to learn — and a place to build.",
+        "PANDA_CODING pairs practical IT education with dependable software development. A place to learn — and a place to build.",
       heroPrimary: "Book a free consult",
       heroSecondary: "Explore services",
-      statsTitle: "SONCODING in numbers",
+      statsTitle: "PANDA_CODING in numbers",
       stats: [
         { value: "500+", label: "Graduates" },
         { value: "50+", label: "Projects delivered" },
@@ -230,7 +230,7 @@ const dictionaries = {
       devCardTitle: "Software Development",
       devCardDesc:
         "From websites to workflow automation and custom solutions — planning, building, and running it with you.",
-      whyTitle: "Why SONCODING",
+      whyTitle: "Why PANDA_CODING",
       why: [
         {
           title: "10 years of teaching",
@@ -252,7 +252,7 @@ const dictionaries = {
     about: {
       title: "About",
       subtitle: "We teach — and we build it too",
-      lead: "SONCODING is a team that does both IT education and software development. We believe learning and real work should never be separate.",
+      lead: "PANDA_CODING is a team that does both IT education and software development. We believe learning and real work should never be separate.",
       missionTitle: "Our mission",
       missionDesc:
         "We help anyone solve problems with technology — giving learners real skills, and builders a partner they can trust.",

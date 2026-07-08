@@ -25,7 +25,7 @@ export default async function LangLayout({
   const websiteLd = {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    name: "SONCODING",
+    name: "PANDA_CODING",
     url: `https://all-my-projects-2026.github.io/SONCODING/${lang}/`,
     inLanguage: lang,
   };
