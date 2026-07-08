@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import type { Locale } from "@/lib/i18n";
 
-// Localized wordmark: Korean shows 포켓코딩, English shows POCKET_CODING.
-const BRAND: Record<Locale, string> = { ko: "포켓코딩", en: "POCKET_CODING" };
+// Wordmark is always the English "POCKET_CODING", regardless of the ko/en
+// language toggle.
+const BRAND: Record<Locale, string> = { ko: "POCKET_CODING", en: "POCKET_CODING" };
 
 // Simple pocket mark — a shirt pocket outline (with a center flap notch)
 // in white on the blue brand tile.
