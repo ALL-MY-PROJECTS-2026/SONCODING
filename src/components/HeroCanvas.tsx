@@ -23,9 +23,11 @@ const PALETTE = [0x60a5fa, 0x818cf8, 0x22d3ee, 0xa78bfa];
 
 /**
  * Generated three.js particle field behind the hero — zero external assets
- * (no copyright), and interactive: the field parallax-tilts toward the pointer
- * while it hovers the banner. Respects prefers-reduced-motion (static frame),
- * pauses when scrolled out of view, and cleans up fully.
+ * (no copyright), and interactive: the field parallax-tilts toward the pointer,
+ * and light "signals" pulse outward from the node nearest the cursor along a
+ * sparse comm-network, spreading far like fiber-optic transmission. Respects
+ * prefers-reduced-motion (static frame), pauses when scrolled out of view, and
+ * cleans up fully.
  */
 export function HeroCanvas() {
   const mountRef = useRef<HTMLDivElement>(null);
@@ -71,45 +73,26 @@ export function HeroCanvas() {
     geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
     geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
 
-    // Subtle 3D network mesh: connect nearby points with thin lines. Computed
-    // once — points are static in local space, only the group rotates, so the
-    // links tilt/rotate in 3D with the field. Degree is capped so the web stays
-    // airy rather than busy.
-    const linePos: number[] = [];
-    const lineCol: number[] = [];
-    const degree = new Int16Array(count);
-    const TH = width < 640 ? 5 : 4.4;
-    const TH2 = TH * TH;
-    const MAXDEG = 3;
-    for (let i = 0; i < count; i++) {
-      if (degree[i] >= MAXDEG) continue;
-      for (let j = i + 1; j < count; j++) {
-        if (degree[i] >= MAXDEG) break;
-        if (degree[j] >= MAXDEG) continue;
-        const dx = positions[i * 3] - positions[j * 3];
-        const dy = positions[i * 3 + 1] - positions[j * 3 + 1];
-        const dz = positions[i * 3 + 2] - positions[j * 3 + 2];
-        if (dx * dx + dy * dy + dz * dz < TH2) {
-          linePos.push(
-            positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2],
-            positions[j * 3], positions[j * 3 + 1], positions[j * 3 + 2],
-          );
-          lineCol.push(
-            colors[i * 3], colors[i * 3 + 1], colors[i * 3 + 2],
-            colors[j * 3], colors[j * 3 + 1], colors[j * 3 + 2],
-          );
-          degree[i]++;
-          degree[j]++;
-        }
-      }
-    }
+    // Interactive comm-network pulses: light signals race along a precomputed
+    // sparse graph, outward from the cursor. Buffers hold the currently-lit
+    // pulse segments; drawRange controls how many are live each frame.
+    const MAX_SEG = 600;
+    const linePositions = new Float32Array(MAX_SEG * 2 * 3);
+    const lineColors = new Float32Array(MAX_SEG * 2 * 3);
     const lineGeometry = new THREE.BufferGeometry();
-    lineGeometry.setAttribute("position", new THREE.BufferAttribute(new Float32Array(linePos), 3));
-    lineGeometry.setAttribute("color", new THREE.BufferAttribute(new Float32Array(lineCol), 3));
+    const linePosAttr = new THREE.BufferAttribute(linePositions, 3).setUsage(
+      THREE.DynamicDrawUsage,
+    );
+    const lineColAttr = new THREE.BufferAttribute(lineColors, 3).setUsage(
+      THREE.DynamicDrawUsage,
+    );
+    lineGeometry.setAttribute("position", linePosAttr);
+    lineGeometry.setAttribute("color", lineColAttr);
+    lineGeometry.setDrawRange(0, 0);
     const lineMaterial = new THREE.LineBasicMaterial({
       vertexColors: true,
       transparent: true,
-      opacity: 0.32,
+      opacity: 0.9,
       depthWrite: false,
     });
 
@@ -126,14 +109,20 @@ export function HeroCanvas() {
     });
 
     const group = new THREE.Group();
-    // Lines first so the glowing dots render on top of the mesh.
-    group.add(new THREE.LineSegments(lineGeometry, lineMaterial));
     group.add(new THREE.Points(geometry, material));
     scene.add(group);
 
-    // Pointer parallax — only reacts while the cursor is over the banner.
-    let pointerX = 0;
-    let pointerY = 0;
+    // Pulse segments are computed in world space (endpoints ride the rotating
+    // field), so the LineSegments lives in the scene root, not the group.
+    const lineSegments = new THREE.LineSegments(lineGeometry, lineMaterial);
+    lineSegments.frustumCulled = false;
+    scene.add(lineSegments);
+
+    // Pointer state. ndc* is the pointer in normalized device coords (up = +1),
+    // used for the parallax tilt and to anchor the cursor lines.
+    let pointerActive = false;
+    let ndcX = 0;
+    let ndcY = 0;
     let curX = 0;
     let curY = 0;
     let spin = 0;
@@ -144,24 +133,224 @@ export function HeroCanvas() {
       const r = mount.getBoundingClientRect();
       const inside =
         e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+      pointerActive = inside;
       if (inside) {
-        pointerX = ((e.clientX - r.left) / r.width) * 2 - 1;
-        pointerY = ((e.clientY - r.top) / r.height) * 2 - 1;
-      } else {
-        pointerX = 0;
-        pointerY = 0;
+        ndcX = ((e.clientX - r.left) / r.width) * 2 - 1;
+        ndcY = -(((e.clientY - r.top) / r.height) * 2 - 1);
       }
+    };
+    const onWinBlur = () => {
+      pointerActive = false;
+    };
+
+    // Scratch vectors reused each frame (no per-frame allocation).
+    const wp = new THREE.Vector3();
+    const wpNear = new THREE.Vector3();
+    const wpFar = new THREE.Vector3();
+
+    // ── Precomputed sparse comm-network ─────────────────────────────────────
+    // Each node links to its K nearest neighbours (deduped). Signals travel
+    // along these links — we deliberately don't connect everything.
+    const K = width < 640 ? 2 : 3;
+    const edgeA: number[] = [];
+    const edgeB: number[] = [];
+    const edgeLen: number[] = [];
+    {
+      const order = new Int32Array(count);
+      const d2 = new Float32Array(count);
+      const seenEdge = new Set<number>();
+      for (let i = 0; i < count; i++) {
+        for (let j = 0; j < count; j++) {
+          const dx = positions[i * 3] - positions[j * 3];
+          const dy = positions[i * 3 + 1] - positions[j * 3 + 1];
+          const dz = positions[i * 3 + 2] - positions[j * 3 + 2];
+          d2[j] = i === j ? Infinity : dx * dx + dy * dy + dz * dz;
+          order[j] = j;
+        }
+        for (let k = 0; k < K; k++) {
+          let mk = k;
+          for (let j = k + 1; j < count; j++) if (d2[order[j]] < d2[order[mk]]) mk = j;
+          const swap = order[k];
+          order[k] = order[mk];
+          order[mk] = swap;
+          const j = order[k];
+          const a = i < j ? i : j;
+          const b = i < j ? j : i;
+          const key = a * count + b;
+          if (!seenEdge.has(key)) {
+            seenEdge.add(key);
+            edgeA.push(a);
+            edgeB.push(b);
+            edgeLen.push(Math.sqrt(d2[j]));
+          }
+        }
+      }
+    }
+    const edgeCount = edgeA.length;
+    const adj: number[][] = Array.from({ length: count }, () => []);
+    for (let e = 0; e < edgeCount; e++) {
+      adj[edgeA[e]].push(e);
+      adj[edgeB[e]].push(e);
+    }
+
+    // Graph distance from a source node (Dijkstra, recomputed once per pulse).
+    const nodeDist = new Float32Array(count);
+    const nodeDone = new Uint8Array(count);
+    const computeWave = (source: number) => {
+      nodeDist.fill(Infinity);
+      nodeDone.fill(0);
+      nodeDist[source] = 0;
+      for (let iter = 0; iter < count; iter++) {
+        let u = -1;
+        let best = Infinity;
+        for (let v = 0; v < count; v++) {
+          if (!nodeDone[v] && nodeDist[v] < best) {
+            best = nodeDist[v];
+            u = v;
+          }
+        }
+        if (u === -1) break;
+        nodeDone[u] = 1;
+        const list = adj[u];
+        for (let t = 0; t < list.length; t++) {
+          const e = list[t];
+          const nb = edgeA[e] === u ? edgeB[e] : edgeA[e];
+          const nd = nodeDist[u] + edgeLen[e];
+          if (nd < nodeDist[nb]) nodeDist[nb] = nd;
+        }
+      }
+    };
+
+    // Pulse state.
+    const DURATION = 1900; // ms for the signal front to reach the farthest node
+    const TRAIL = 0.14; // bright pulse length behind the head, as a fraction of spread
+    const AFTERGLOW = 0.4; // fraction of spread over which a passed link fades out
+    const C_HEAD = new THREE.Color(0x0ea5e9); // bright signal head
+    const C_TAIL = new THREE.Color(0x7dd3fc); // just behind the head
+    const C_GLOW = new THREE.Color(0x38bdf8); // freshly-lit link
+    const C_BG = new THREE.Color(0xeaf2fb); // afterglow fades toward the light bg
+    let waveStart = 0;
+    let maxDist = 1;
+    let sourceValid = false;
+
+    // Pick the node nearest the cursor on screen and start a pulse from it.
+    const emitFrom = (now: number) => {
+      group.updateMatrixWorld(true);
+      const aspect = width / height;
+      let src = 0;
+      let bestD = Infinity;
+      for (let i = 0; i < count; i++) {
+        wp.set(positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2])
+          .applyMatrix4(group.matrixWorld)
+          .project(camera);
+        const d = Math.hypot((wp.x - ndcX) * aspect, wp.y - ndcY);
+        if (d < bestD) {
+          bestD = d;
+          src = i;
+        }
+      }
+      computeWave(src);
+      let mx = 1;
+      for (let i = 0; i < count; i++) {
+        const dd = nodeDist[i];
+        if (dd !== Infinity && dd > mx) mx = dd;
+      }
+      maxDist = mx;
+      waveStart = now;
+      sourceValid = true;
+    };
+
+    const updateLines = (now: number) => {
+      let seg = 0;
+      if (pointerActive && sourceValid) {
+        group.updateMatrixWorld(true);
+        const front = ((now - waveStart) / DURATION) * maxDist;
+        const trailLen = maxDist * TRAIL;
+        const glowSpan = maxDist * AFTERGLOW;
+        for (let e = 0; e < edgeCount && seg < MAX_SEG; e++) {
+          const da = nodeDist[edgeA[e]];
+          const db = nodeDist[edgeB[e]];
+          if (da === Infinity && db === Infinity) continue;
+          // Orient the edge outward: near endpoint is closer to the source.
+          const near = da <= db ? edgeA[e] : edgeB[e];
+          const far = da <= db ? edgeB[e] : edgeA[e];
+          const dNear = da <= db ? da : db;
+          const len = edgeLen[e];
+          const dFar = dNear + len;
+          if (front < dNear) continue; // signal hasn't reached this link yet
+          if (front - glowSpan > dFar) continue; // afterglow already faded out
+          wpNear
+            .set(positions[near * 3], positions[near * 3 + 1], positions[near * 3 + 2])
+            .applyMatrix4(group.matrixWorld);
+          wpFar
+            .set(positions[far * 3], positions[far * 3 + 1], positions[far * 3 + 2])
+            .applyMatrix4(group.matrixWorld);
+          const o = seg * 6;
+          if (front <= dFar) {
+            // Bright signal currently travelling along this link (tail → head).
+            let tHead = (front - dNear) / len;
+            if (tHead > 1) tHead = 1;
+            let tTail = (front - trailLen - dNear) / len;
+            if (tTail < 0) tTail = 0;
+            linePositions[o] = wpNear.x + (wpFar.x - wpNear.x) * tTail;
+            linePositions[o + 1] = wpNear.y + (wpFar.y - wpNear.y) * tTail;
+            linePositions[o + 2] = wpNear.z + (wpFar.z - wpNear.z) * tTail;
+            linePositions[o + 3] = wpNear.x + (wpFar.x - wpNear.x) * tHead;
+            linePositions[o + 4] = wpNear.y + (wpFar.y - wpNear.y) * tHead;
+            linePositions[o + 5] = wpNear.z + (wpFar.z - wpNear.z) * tHead;
+            lineColors[o] = C_TAIL.r;
+            lineColors[o + 1] = C_TAIL.g;
+            lineColors[o + 2] = C_TAIL.b;
+            lineColors[o + 3] = C_HEAD.r;
+            lineColors[o + 4] = C_HEAD.g;
+            lineColors[o + 5] = C_HEAD.b;
+          } else {
+            // Signal has passed: the whole link glows, then fades to background,
+            // so the network reads as "filling in" behind the front.
+            const age = (front - dFar) / glowSpan; // 0 just lit → 1 faded
+            const r = C_GLOW.r + (C_BG.r - C_GLOW.r) * age;
+            const g = C_GLOW.g + (C_BG.g - C_GLOW.g) * age;
+            const bl = C_GLOW.b + (C_BG.b - C_GLOW.b) * age;
+            linePositions[o] = wpNear.x;
+            linePositions[o + 1] = wpNear.y;
+            linePositions[o + 2] = wpNear.z;
+            linePositions[o + 3] = wpFar.x;
+            linePositions[o + 4] = wpFar.y;
+            linePositions[o + 5] = wpFar.z;
+            lineColors[o] = r;
+            lineColors[o + 1] = g;
+            lineColors[o + 2] = bl;
+            lineColors[o + 3] = r;
+            lineColors[o + 4] = g;
+            lineColors[o + 5] = bl;
+          }
+          seg++;
+        }
+      }
+      lineGeometry.setDrawRange(0, seg * 2);
+      linePosAttr.needsUpdate = true;
+      lineColAttr.needsUpdate = true;
     };
 
     const render = () => renderer.render(scene, camera);
 
-    const animate = () => {
+    const animate = (ts?: number) => {
       if (!visible) return;
-      curX += (pointerX - curX) * 0.05;
-      curY += (pointerY - curY) * 0.05;
+      const now = ts ?? 0;
+      const tx = pointerActive ? ndcX : 0;
+      const ty = pointerActive ? ndcY : 0;
+      curX += (tx - curX) * 0.05;
+      curY += (ty - curY) * 0.05;
       spin += 0.0006;
       group.rotation.y = spin + curX * 0.55;
-      group.rotation.x = curY * 0.4;
+      group.rotation.x = -curY * 0.4;
+      if (pointerActive) {
+        // Re-emit the next pulse once the previous one's afterglow has faded.
+        if (!sourceValid || (now - waveStart) / DURATION > 1 + AFTERGLOW) emitFrom(now);
+      } else {
+        sourceValid = false;
+      }
+      updateLines(now);
       render();
       rafId = requestAnimationFrame(animate);
     };
@@ -170,6 +359,7 @@ export function HeroCanvas() {
       render();
     } else {
       window.addEventListener("pointermove", onPointerMove, { passive: true });
+      window.addEventListener("blur", onWinBlur);
       animate();
     }
 
@@ -202,6 +392,7 @@ export function HeroCanvas() {
       io.disconnect();
       window.removeEventListener("resize", onResize);
       window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("blur", onWinBlur);
       geometry.dispose();
       material.dispose();
       lineGeometry.dispose();
