@@ -130,33 +130,36 @@ export function HeroCanvas() {
       return 0.5 + 0.5 * (f < 0 ? 0 : f > 1 ? 1 : f);
     };
 
+    // Meteors converge toward a focus point near the centre (slightly low and
+    // into the screen), so they read as "falling inward to the middle".
+    const FOCUS = new THREE.Vector3(0, -3, -5);
     const spawn = (m: Meteor, delay: number) => {
-      m.x = (Math.random() - 0.5) * 66;
-      m.y = 20 + Math.random() * 16; // start above the top (outside)
-      m.z = (Math.random() - 0.5) * 22;
-      // Direction: down + slightly sideways + into the screen ("밖에서 안으로").
-      let dx = -0.32 - Math.random() * 0.16;
-      let dy = -1;
-      let dz = -0.16 - Math.random() * 0.22;
-      const L = Math.hypot(dx, dy, dz);
-      dx /= L;
-      dy /= L;
-      dz /= L;
-      m.dx = dx;
-      m.dy = dy;
-      m.dz = dz;
-      m.speed = 20 + Math.random() * 18;
-      m.len = 5 + Math.random() * 6;
+      // Start out on the upper/outer region.
+      m.x = (Math.random() - 0.5) * 74;
+      m.y = 16 + Math.random() * 24;
+      m.z = (Math.random() - 0.5) * 20;
+      // Aim at the focus (with a little jitter) → the shower converges centrally.
+      let dx = FOCUS.x + (Math.random() - 0.5) * 10 - m.x;
+      let dy = FOCUS.y + (Math.random() - 0.5) * 10 - m.y;
+      let dz = FOCUS.z + (Math.random() - 0.5) * 10 - m.z;
+      const L = Math.hypot(dx, dy, dz) || 1;
+      m.dx = dx / L;
+      m.dy = dy / L;
+      m.dz = dz / L;
+      m.speed = 14 + Math.random() * 14;
+      m.len = 16 + Math.random() * 12; // long trails so streaks read continuous
       m.delay = delay;
     };
 
     const meteors: Meteor[] = [];
     for (let i = 0; i < METEORS; i++) {
       const m: Meteor = { x: 0, y: 0, z: 0, dx: 0, dy: 0, dz: 0, speed: 0, len: 0, delay: 0 };
-      spawn(m, Math.random() * 1.4);
-      // Spread the initial shower along the fall path so some are already
-      // mid-flight and visible right away (respawns start above the top).
-      m.y = 34 - Math.random() * 54;
+      spawn(m, 0); // initial batch is live immediately (respawns get a delay)
+      // Advance each one a random distance so the shower is already populated.
+      const adv = Math.random() * 34;
+      m.x += m.dx * adv;
+      m.y += m.dy * adv;
+      m.z += m.dz * adv;
       meteors.push(m);
     }
 
@@ -175,8 +178,12 @@ export function HeroCanvas() {
         m.x += m.dx * m.speed * dt;
         m.y += m.dy * m.speed * dt;
         m.z += m.dz * m.speed * dt;
-        if (m.y < -22) {
-          spawn(m, Math.random() * 1.6);
+        // Respawn once it reaches the central focus (or drops past the bottom).
+        const fx = m.x - FOCUS.x;
+        const fy = m.y - FOCUS.y;
+        const fz = m.z - FOCUS.z;
+        if (fx * fx + fy * fy + fz * fz < 49 || m.y < -20) {
+          spawn(m, Math.random() * 1);
           continue;
         }
         const tailX = m.x - m.dx * m.len;
