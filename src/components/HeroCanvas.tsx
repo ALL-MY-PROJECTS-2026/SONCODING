@@ -222,14 +222,25 @@ export function HeroCanvas() {
     };
 
     // Pulse state.
-    const DURATION = 1900; // ms for the signal front to reach the farthest node
-    const TRAIL = 0.14; // bright pulse length behind the head, as a fraction of spread
-    const AFTERGLOW = 0.4; // fraction of spread over which a passed link fades out
+    const DURATION = 3400; // ms for the signal front to reach the farthest node (slow)
+    const TRAIL = 0.16; // bright pulse length behind the head, as a fraction of spread
+    const AFTERGLOW = 0.3; // fraction of spread over which a passed link fades out
     const C_HEAD = new THREE.Color(0x0ea5e9); // bright signal head
     const C_TAIL = new THREE.Color(0x7dd3fc); // just behind the head
     const C_GLOW = new THREE.Color(0x38bdf8); // freshly-lit link
-    const C_BG = new THREE.Color(0xeaf2fb); // afterglow fades toward the light bg
+    const C_BG = new THREE.Color(0xeaf2fb); // fades toward the light bg
     let waveStart = 0;
+
+    // Depth cue: fade a line vertex toward the background by its distance from
+    // the camera, so the links read with real 3D perspective (near = crisp,
+    // far = washed out). Returns a brightness multiplier in [0.2, 1].
+    const camZ = camera.position.z;
+    const DEPTH_NEAR = 12;
+    const DEPTH_FAR = 40;
+    const depthBright = (wz: number) => {
+      const f = (DEPTH_FAR - (camZ - wz)) / (DEPTH_FAR - DEPTH_NEAR);
+      return 0.2 + 0.8 * (f < 0 ? 0 : f > 1 ? 1 : f);
+    };
     let maxDist = 1;
     let sourceValid = false;
 
@@ -292,18 +303,22 @@ export function HeroCanvas() {
             if (tHead > 1) tHead = 1;
             let tTail = (front - trailLen - dNear) / len;
             if (tTail < 0) tTail = 0;
+            const ztail = wpNear.z + (wpFar.z - wpNear.z) * tTail;
+            const zhead = wpNear.z + (wpFar.z - wpNear.z) * tHead;
+            const bt = depthBright(ztail);
+            const bh = depthBright(zhead);
             linePositions[o] = wpNear.x + (wpFar.x - wpNear.x) * tTail;
             linePositions[o + 1] = wpNear.y + (wpFar.y - wpNear.y) * tTail;
-            linePositions[o + 2] = wpNear.z + (wpFar.z - wpNear.z) * tTail;
+            linePositions[o + 2] = ztail;
             linePositions[o + 3] = wpNear.x + (wpFar.x - wpNear.x) * tHead;
             linePositions[o + 4] = wpNear.y + (wpFar.y - wpNear.y) * tHead;
-            linePositions[o + 5] = wpNear.z + (wpFar.z - wpNear.z) * tHead;
-            lineColors[o] = C_TAIL.r;
-            lineColors[o + 1] = C_TAIL.g;
-            lineColors[o + 2] = C_TAIL.b;
-            lineColors[o + 3] = C_HEAD.r;
-            lineColors[o + 4] = C_HEAD.g;
-            lineColors[o + 5] = C_HEAD.b;
+            linePositions[o + 5] = zhead;
+            lineColors[o] = C_BG.r + (C_TAIL.r - C_BG.r) * bt;
+            lineColors[o + 1] = C_BG.g + (C_TAIL.g - C_BG.g) * bt;
+            lineColors[o + 2] = C_BG.b + (C_TAIL.b - C_BG.b) * bt;
+            lineColors[o + 3] = C_BG.r + (C_HEAD.r - C_BG.r) * bh;
+            lineColors[o + 4] = C_BG.g + (C_HEAD.g - C_BG.g) * bh;
+            lineColors[o + 5] = C_BG.b + (C_HEAD.b - C_BG.b) * bh;
           } else {
             // Signal has passed: the whole link glows, then fades to background,
             // so the network reads as "filling in" behind the front.
@@ -311,18 +326,20 @@ export function HeroCanvas() {
             const r = C_GLOW.r + (C_BG.r - C_GLOW.r) * age;
             const g = C_GLOW.g + (C_BG.g - C_GLOW.g) * age;
             const bl = C_GLOW.b + (C_BG.b - C_GLOW.b) * age;
+            const bn = depthBright(wpNear.z);
+            const bf = depthBright(wpFar.z);
             linePositions[o] = wpNear.x;
             linePositions[o + 1] = wpNear.y;
             linePositions[o + 2] = wpNear.z;
             linePositions[o + 3] = wpFar.x;
             linePositions[o + 4] = wpFar.y;
             linePositions[o + 5] = wpFar.z;
-            lineColors[o] = r;
-            lineColors[o + 1] = g;
-            lineColors[o + 2] = bl;
-            lineColors[o + 3] = r;
-            lineColors[o + 4] = g;
-            lineColors[o + 5] = bl;
+            lineColors[o] = C_BG.r + (r - C_BG.r) * bn;
+            lineColors[o + 1] = C_BG.g + (g - C_BG.g) * bn;
+            lineColors[o + 2] = C_BG.b + (bl - C_BG.b) * bn;
+            lineColors[o + 3] = C_BG.r + (r - C_BG.r) * bf;
+            lineColors[o + 4] = C_BG.g + (g - C_BG.g) * bf;
+            lineColors[o + 5] = C_BG.b + (bl - C_BG.b) * bf;
           }
           seg++;
         }
