@@ -221,13 +221,17 @@ export function HeroCanvas() {
       }
     };
 
-    // Depth-sweep state: a front sweeps along z from the outer side (toward the
-    // camera) into the screen; each link extends inward as the front passes it.
-    const DURATION = 2200; // ms for the front to sweep the full depth range
-    const AFTERGLOW = 0.3; // depth-span fraction over which a finished link fades
-    const GROWWIN = 3.5; // depth units over which a link extends to full length
-    const C_HEAD = new THREE.Color(0x0ea5e9); // bright advancing tip
-    const C_GLOW = new THREE.Color(0x38bdf8); // settled, freshly-drawn link
+    // Two-phase "shot": a straight beam fires from the outer side (large z,
+    // toward the camera) into the node nearest the cursor, then the impact
+    // ripples outward through the network to the other points.
+    const BEAM_MS = 480; // beam flight time to the impact node
+    const RIPPLE_MS = 1500; // time for the ripple to reach the farthest node
+    const AFTERGLOW = 0.35; // graph-span fraction over which a lit link fades
+    const BEAM_OUT = 22; // how far out along +z the beam starts
+    const BEAM_UP = 7; // slight upward offset of the beam origin
+    const C_BEAM = new THREE.Color(0x22d3ee); // bright incoming beam
+    const C_HEAD = new THREE.Color(0x0ea5e9); // ripple advancing tip
+    const C_GLOW = new THREE.Color(0x38bdf8); // settled, freshly-lit link
     const C_BG = new THREE.Color(0xeaf2fb); // fades toward the light bg
     let waveStart = 0;
 
@@ -241,99 +245,149 @@ export function HeroCanvas() {
       const f = (DEPTH_FAR - (camZ - wz)) / (DEPTH_FAR - DEPTH_NEAR);
       return 0.2 + 0.8 * (f < 0 ? 0 : f > 1 ? 1 : f);
     };
-    let maxDist = 1; // depth span of the field (set per emit)
+    let maxDist = 1; // max graph distance from the impact node (set per emit)
     let sourceValid = false;
-    const zWorld = new Float32Array(count); // world-space z of each node, per emit
-    let zOuter = 0; // z of the outermost node — the front starts here
+    let srcIndex = 0; // impact node (nearest the cursor)
+    const impactPos = new THREE.Vector3(); // beam target (live), reused per frame
+    const anchorPos = new THREE.Vector3(); // beam origin (outer), reused per frame
 
-    // Pick the node nearest the cursor (to define the lit sub-network), snapshot
-    // node depths, and start a depth sweep from the outer side inward.
+    // Pick the impact node nearest the cursor and compute graph distances for the
+    // ripple that spreads out from it.
     const emitFrom = (now: number) => {
       group.updateMatrixWorld(true);
       const aspect = width / height;
       let src = 0;
       let bestD = Infinity;
-      let zMax = -Infinity;
-      let zMin = Infinity;
       for (let i = 0; i < count; i++) {
-        wp.set(positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2]).applyMatrix4(
-          group.matrixWorld,
-        );
-        const z = wp.z;
-        zWorld[i] = z;
-        if (z > zMax) zMax = z;
-        if (z < zMin) zMin = z;
-        wp.project(camera);
+        wp.set(positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2])
+          .applyMatrix4(group.matrixWorld)
+          .project(camera);
         const d = Math.hypot((wp.x - ndcX) * aspect, wp.y - ndcY);
         if (d < bestD) {
           bestD = d;
           src = i;
         }
       }
+      srcIndex = src;
       computeWave(src);
-      zOuter = zMax;
-      maxDist = Math.max(zMax - zMin, 1);
+      let mx = 1;
+      for (let i = 0; i < count; i++) {
+        const dd = nodeDist[i];
+        if (dd !== Infinity && dd > mx) mx = dd;
+      }
+      maxDist = mx;
       waveStart = now;
       sourceValid = true;
+    };
+
+    // Write one segment (p0 → p1) with per-vertex colours into the buffers.
+    const putSeg = (
+      s: number,
+      x0: number, y0: number, z0: number,
+      x1: number, y1: number, z1: number,
+      r0: number, g0: number, b0: number,
+      r1: number, g1: number, b1: number,
+    ) => {
+      const o = s * 6;
+      linePositions[o] = x0;
+      linePositions[o + 1] = y0;
+      linePositions[o + 2] = z0;
+      linePositions[o + 3] = x1;
+      linePositions[o + 4] = y1;
+      linePositions[o + 5] = z1;
+      lineColors[o] = r0;
+      lineColors[o + 1] = g0;
+      lineColors[o + 2] = b0;
+      lineColors[o + 3] = r1;
+      lineColors[o + 4] = g1;
+      lineColors[o + 5] = b1;
+      return s + 1;
     };
 
     const updateLines = (now: number) => {
       let seg = 0;
       if (pointerActive && sourceValid) {
         group.updateMatrixWorld(true);
-        const front = ((now - waveStart) / DURATION) * maxDist;
-        const glowSpan = maxDist * AFTERGLOW;
-        for (let e = 0; e < edgeCount && seg < MAX_SEG; e++) {
-          const a = edgeA[e];
-          const b = edgeB[e];
-          if (nodeDist[a] === Infinity && nodeDist[b] === Infinity) continue;
-          // Outer endpoint = larger z (toward the camera). Each link is anchored
-          // at its outer node and EXTENDS inward (into the screen) as the depth
-          // front passes, so the network reaches out from the outside in and the
-          // segments always stay attached to their nodes (properly connected).
-          const za = zWorld[a];
-          const zb = zWorld[b];
-          const outer = za >= zb ? a : b;
-          const inner = za >= zb ? b : a;
-          const dOuter = zOuter - (za >= zb ? za : zb);
-          if (front < dOuter) continue; // front hasn't reached this link yet
-          const age = front - dOuter - GROWWIN; // <0 extending, ≥0 fully drawn
-          if (age > glowSpan) continue; // afterglow faded out
-          const grow = age < 0 ? (front - dOuter) / GROWWIN : 1; // 0→1 extension
-          wpNear
-            .set(positions[outer * 3], positions[outer * 3 + 1], positions[outer * 3 + 2])
-            .applyMatrix4(group.matrixWorld);
-          wpFar
-            .set(positions[inner * 3], positions[inner * 3 + 1], positions[inner * 3 + 2])
-            .applyMatrix4(group.matrixWorld);
-          const tipX = wpNear.x + (wpFar.x - wpNear.x) * grow;
-          const tipY = wpNear.y + (wpFar.y - wpNear.y) * grow;
-          const tipZ = wpNear.z + (wpFar.z - wpNear.z) * grow;
-          const gl = age < 0 ? 0 : age / glowSpan; // 0 fresh → 1 faded
-          // Settled colour for the outer end (and the tip once fully grown).
-          const sr = C_GLOW.r + (C_BG.r - C_GLOW.r) * gl;
-          const sg = C_GLOW.g + (C_BG.g - C_GLOW.g) * gl;
-          const sb = C_GLOW.b + (C_BG.b - C_GLOW.b) * gl;
-          // The advancing tip glows bright while the link is still extending.
-          const tr = age < 0 ? C_HEAD.r : sr;
-          const tg = age < 0 ? C_HEAD.g : sg;
-          const tb = age < 0 ? C_HEAD.b : sb;
-          const bo = depthBright(wpNear.z);
-          const bt = depthBright(tipZ);
-          const o = seg * 6;
-          linePositions[o] = wpNear.x;
-          linePositions[o + 1] = wpNear.y;
-          linePositions[o + 2] = wpNear.z;
-          linePositions[o + 3] = tipX;
-          linePositions[o + 4] = tipY;
-          linePositions[o + 5] = tipZ;
-          lineColors[o] = C_BG.r + (sr - C_BG.r) * bo;
-          lineColors[o + 1] = C_BG.g + (sg - C_BG.g) * bo;
-          lineColors[o + 2] = C_BG.b + (sb - C_BG.b) * bo;
-          lineColors[o + 3] = C_BG.r + (tr - C_BG.r) * bt;
-          lineColors[o + 4] = C_BG.g + (tg - C_BG.g) * bt;
-          lineColors[o + 5] = C_BG.b + (tb - C_BG.b) * bt;
-          seg++;
+        const elapsed = now - waveStart;
+
+        // Impact node (live) and the outer anchor the beam is fired from.
+        impactPos
+          .set(positions[srcIndex * 3], positions[srcIndex * 3 + 1], positions[srcIndex * 3 + 2])
+          .applyMatrix4(group.matrixWorld);
+        anchorPos.set(impactPos.x, impactPos.y + BEAM_UP, impactPos.z + BEAM_OUT);
+
+        // ── Phase A: straight beam flies in from outer z to the impact node ──
+        if (elapsed < BEAM_MS) {
+          const p = elapsed / BEAM_MS;
+          const tail = Math.max(0, p - 0.4);
+          const dx = impactPos.x - anchorPos.x;
+          const dy = impactPos.y - anchorPos.y;
+          const dz = impactPos.z - anchorPos.z;
+          const hz = anchorPos.z + dz * p;
+          const tz = anchorPos.z + dz * tail;
+          const bh = depthBright(hz);
+          const btl = depthBright(tz) * 0.5;
+          seg = putSeg(
+            seg,
+            anchorPos.x + dx * tail, anchorPos.y + dy * tail, tz,
+            anchorPos.x + dx * p, anchorPos.y + dy * p, hz,
+            C_BG.r + (C_BEAM.r - C_BG.r) * btl,
+            C_BG.g + (C_BEAM.g - C_BG.g) * btl,
+            C_BG.b + (C_BEAM.b - C_BG.b) * btl,
+            C_BG.r + (C_BEAM.r - C_BG.r) * bh,
+            C_BG.g + (C_BEAM.g - C_BG.g) * bh,
+            C_BG.b + (C_BEAM.b - C_BG.b) * bh,
+          );
+        }
+
+        // ── Phase B: the impact ripples outward through the network ──
+        if (elapsed >= BEAM_MS) {
+          const front = ((elapsed - BEAM_MS) / RIPPLE_MS) * maxDist;
+          const glowSpan = maxDist * AFTERGLOW;
+          for (let e = 0; e < edgeCount && seg < MAX_SEG; e++) {
+            const a = edgeA[e];
+            const b = edgeB[e];
+            const da = nodeDist[a];
+            const db = nodeDist[b];
+            if (da === Infinity && db === Infinity) continue;
+            // Anchor the link at the endpoint nearer the impact; extend outward.
+            const near = da <= db ? a : b;
+            const far = da <= db ? b : a;
+            const dNear = da <= db ? da : db;
+            const len = edgeLen[e];
+            if (front < dNear) continue; // ripple hasn't reached this link yet
+            const age = front - dNear - len; // <0 extending, ≥0 fully drawn
+            if (age > glowSpan) continue; // faded out
+            const grow = age < 0 ? (front - dNear) / len : 1;
+            wpNear
+              .set(positions[near * 3], positions[near * 3 + 1], positions[near * 3 + 2])
+              .applyMatrix4(group.matrixWorld);
+            wpFar
+              .set(positions[far * 3], positions[far * 3 + 1], positions[far * 3 + 2])
+              .applyMatrix4(group.matrixWorld);
+            const tipX = wpNear.x + (wpFar.x - wpNear.x) * grow;
+            const tipY = wpNear.y + (wpFar.y - wpNear.y) * grow;
+            const tipZ = wpNear.z + (wpFar.z - wpNear.z) * grow;
+            const gl = age < 0 ? 0 : age / glowSpan; // 0 fresh → 1 faded
+            const sr = C_GLOW.r + (C_BG.r - C_GLOW.r) * gl;
+            const sg = C_GLOW.g + (C_BG.g - C_GLOW.g) * gl;
+            const sb = C_GLOW.b + (C_BG.b - C_GLOW.b) * gl;
+            const tr = age < 0 ? C_HEAD.r : sr;
+            const tg = age < 0 ? C_HEAD.g : sg;
+            const tb = age < 0 ? C_HEAD.b : sb;
+            const bo = depthBright(wpNear.z);
+            const bt = depthBright(tipZ);
+            seg = putSeg(
+              seg,
+              wpNear.x, wpNear.y, wpNear.z, tipX, tipY, tipZ,
+              C_BG.r + (sr - C_BG.r) * bo,
+              C_BG.g + (sg - C_BG.g) * bo,
+              C_BG.b + (sb - C_BG.b) * bo,
+              C_BG.r + (tr - C_BG.r) * bt,
+              C_BG.g + (tg - C_BG.g) * bt,
+              C_BG.b + (tb - C_BG.b) * bt,
+            );
+          }
         }
       }
       if (seg === 0) {
@@ -358,8 +412,9 @@ export function HeroCanvas() {
       group.rotation.y = spin + curX * 0.55;
       group.rotation.x = -curY * 0.4;
       if (pointerActive) {
-        // Re-emit once the previous sweep (grow + afterglow) has fully faded.
-        if (!sourceValid || (now - waveStart) / DURATION > 1 + AFTERGLOW + 0.2) emitFrom(now);
+        // Re-emit once the previous shot (beam + ripple + afterglow) has faded.
+        if (!sourceValid || now - waveStart > BEAM_MS + RIPPLE_MS * (1 + AFTERGLOW) + 150)
+          emitFrom(now);
       } else {
         sourceValid = false;
       }
