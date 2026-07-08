@@ -88,7 +88,7 @@ export function HeroCanvas() {
     const lineMaterial = new LineMaterial({
       vertexColors: true,
       worldUnits: true,
-      linewidth: 0.16,
+      linewidth: 0.22,
       transparent: true,
       opacity: 0.95,
       depthTest: false,
@@ -229,10 +229,11 @@ export function HeroCanvas() {
     const AFTERGLOW = 0.35; // graph-span fraction over which a lit link fades
     const BEAM_OUT = 22; // how far out along +z the beam starts
     const BEAM_UP = 7; // slight upward offset of the beam origin
-    const C_BEAM = new THREE.Color(0x22d3ee); // bright incoming beam
-    const C_HEAD = new THREE.Color(0x0ea5e9); // ripple advancing tip
-    const C_GLOW = new THREE.Color(0x38bdf8); // settled, freshly-lit link
-    const C_BG = new THREE.Color(0xeaf2fb); // fades toward the light bg
+    const C_BEAM = new THREE.Color(0x0891b2); // bright incoming beam (cyan-600)
+    const C_HEAD = new THREE.Color(0x1d4ed8); // ripple advancing tip (blue-700)
+    const C_GLOW = new THREE.Color(0x3b82f6); // settled, freshly-lit link (blue-500)
+    const C_FADE = new THREE.Color(0x93c5fd); // depth-fade base — still visible (blue-300)
+    const C_BG = new THREE.Color(0xeaf2fb); // afterglow disappears toward this
     let waveStart = 0;
 
     // Depth cue: fade a line vertex toward the background by its distance from
@@ -243,7 +244,7 @@ export function HeroCanvas() {
     const DEPTH_FAR = 40;
     const depthBright = (wz: number) => {
       const f = (DEPTH_FAR - (camZ - wz)) / (DEPTH_FAR - DEPTH_NEAR);
-      return 0.2 + 0.8 * (f < 0 ? 0 : f > 1 ? 1 : f);
+      return 0.55 + 0.45 * (f < 0 ? 0 : f > 1 ? 1 : f);
     };
     let maxDist = 1; // max graph distance from the impact node (set per emit)
     let sourceValid = false;
@@ -331,12 +332,12 @@ export function HeroCanvas() {
             seg,
             anchorPos.x + dx * tail, anchorPos.y + dy * tail, tz,
             anchorPos.x + dx * p, anchorPos.y + dy * p, hz,
-            C_BG.r + (C_BEAM.r - C_BG.r) * btl,
-            C_BG.g + (C_BEAM.g - C_BG.g) * btl,
-            C_BG.b + (C_BEAM.b - C_BG.b) * btl,
-            C_BG.r + (C_BEAM.r - C_BG.r) * bh,
-            C_BG.g + (C_BEAM.g - C_BG.g) * bh,
-            C_BG.b + (C_BEAM.b - C_BG.b) * bh,
+            C_FADE.r + (C_BEAM.r - C_FADE.r) * btl,
+            C_FADE.g + (C_BEAM.g - C_FADE.g) * btl,
+            C_FADE.b + (C_BEAM.b - C_FADE.b) * btl,
+            C_FADE.r + (C_BEAM.r - C_FADE.r) * bh,
+            C_FADE.g + (C_BEAM.g - C_FADE.g) * bh,
+            C_FADE.b + (C_BEAM.b - C_FADE.b) * bh,
           );
         }
 
@@ -380,12 +381,12 @@ export function HeroCanvas() {
             seg = putSeg(
               seg,
               wpNear.x, wpNear.y, wpNear.z, tipX, tipY, tipZ,
-              C_BG.r + (sr - C_BG.r) * bo,
-              C_BG.g + (sg - C_BG.g) * bo,
-              C_BG.b + (sb - C_BG.b) * bo,
-              C_BG.r + (tr - C_BG.r) * bt,
-              C_BG.g + (tg - C_BG.g) * bt,
-              C_BG.b + (tb - C_BG.b) * bt,
+              C_FADE.r + (sr - C_FADE.r) * bo,
+              C_FADE.g + (sg - C_FADE.g) * bo,
+              C_FADE.b + (sb - C_FADE.b) * bo,
+              C_FADE.r + (tr - C_FADE.r) * bt,
+              C_FADE.g + (tg - C_FADE.g) * bt,
+              C_FADE.b + (tb - C_FADE.b) * bt,
             );
           }
         }
