@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowRight, UserCheck, Rocket, HeartHandshake, Quote, Check, type LucideIcon } from "lucide-react";
+import { ArrowRight, UserCheck, Rocket, HeartHandshake, Quote, Check, GraduationCap, Code2, type LucideIcon } from "lucide-react";
 import { Container } from "@/components/Container";
 import { Aurora } from "@/components/Aurora";
 import { HeroCanvas } from "@/components/HeroCanvas";
@@ -132,10 +132,15 @@ export default async function HomePage({
               href={`/${locale}/education`}
               className="reveal group rounded-2xl border border-slate-200 bg-white p-8 transition-all hover:-translate-y-1 hover:border-blue-300 hover:shadow-xl hover:shadow-blue-100"
             >
-              <div className="text-sm font-semibold uppercase tracking-wide text-blue-600">
-                01
+              <div className="flex items-center gap-4">
+                <div className="grid h-12 w-12 place-items-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 text-white shadow-sm transition-transform group-hover:scale-105">
+                  <GraduationCap className="h-6 w-6" aria-hidden="true" />
+                </div>
+                <span className="text-sm font-semibold uppercase tracking-wide text-blue-500/70">
+                  01
+                </span>
               </div>
-              <h3 className="mt-3 text-xl font-bold text-slate-900">
+              <h3 className="mt-5 text-xl font-bold text-slate-900">
                 {t.eduCardTitle}
               </h3>
               <p className="mt-3 leading-relaxed text-slate-600">
@@ -150,10 +155,15 @@ export default async function HomePage({
               href={`/${locale}/services`}
               className="reveal group rounded-2xl border border-slate-200 bg-white p-8 transition-all hover:-translate-y-1 hover:border-blue-300 hover:shadow-xl hover:shadow-blue-100"
             >
-              <div className="text-sm font-semibold uppercase tracking-wide text-blue-600">
-                02
+              <div className="flex items-center gap-4">
+                <div className="grid h-12 w-12 place-items-center rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 text-white shadow-sm transition-transform group-hover:scale-105">
+                  <Code2 className="h-6 w-6" aria-hidden="true" />
+                </div>
+                <span className="text-sm font-semibold uppercase tracking-wide text-indigo-500/70">
+                  02
+                </span>
               </div>
-              <h3 className="mt-3 text-xl font-bold text-slate-900">
+              <h3 className="mt-5 text-xl font-bold text-slate-900">
                 {t.devCardTitle}
               </h3>
               <p className="mt-3 leading-relaxed text-slate-600">
