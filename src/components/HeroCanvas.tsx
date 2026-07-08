@@ -193,12 +193,15 @@ export function HeroCanvas() {
       adj[edgeB[e]].push(e);
     }
 
-    // Graph distance from a source node (Dijkstra, recomputed once per pulse).
+    // Graph distance + predecessor edge from a source (Dijkstra, per shot). The
+    // predecessor edges form a shortest-path TREE we draw as growing branches.
     const nodeDist = new Float32Array(count);
     const nodeDone = new Uint8Array(count);
+    const nodePred = new Int32Array(count); // edge used to reach the node, -1 = none
     const computeWave = (source: number) => {
       nodeDist.fill(Infinity);
       nodeDone.fill(0);
+      nodePred.fill(-1);
       nodeDist[source] = 0;
       for (let iter = 0; iter < count; iter++) {
         let u = -1;
@@ -216,7 +219,10 @@ export function HeroCanvas() {
           const e = list[t];
           const nb = edgeA[e] === u ? edgeB[e] : edgeA[e];
           const nd = nodeDist[u] + edgeLen[e];
-          if (nd < nodeDist[nb]) nodeDist[nb] = nd;
+          if (nd < nodeDist[nb]) {
+            nodeDist[nb] = nd;
+            nodePred[nb] = e;
+          }
         }
       }
     };
@@ -224,9 +230,10 @@ export function HeroCanvas() {
     // Two-phase "shot": a straight beam fires from the outer side (large z,
     // toward the camera) into the node nearest the cursor, then the impact
     // ripples outward through the network to the other points.
-    const BEAM_MS = 480; // beam flight time to the impact node
-    const RIPPLE_MS = 1500; // time for the ripple to reach the farthest node
-    const AFTERGLOW = 0.35; // graph-span fraction over which a lit link fades
+    const BEAM_MS = 420; // beam flight time to the impact node
+    const RIPPLE_MS = 1500; // time for branches to grow out to the farthest node
+    const HOLD_MS = 500; // fully-connected network held before it fades
+    const FADE_MS = 650; // whole network fades out together (stays connected)
     const BEAM_OUT = 22; // how far out along +z the beam starts
     const BEAM_UP = 7; // slight upward offset of the beam origin
     const C_BEAM = new THREE.Color(0x0891b2); // bright incoming beam (cyan-600)
@@ -341,52 +348,54 @@ export function HeroCanvas() {
           );
         }
 
-        // ── Phase B: the impact ripples outward through the network ──
+        // ── Phase B: branches grow out along the shortest-path tree and stay
+        // connected (parent → child), then the whole network fades together. ──
         if (elapsed >= BEAM_MS) {
-          const front = ((elapsed - BEAM_MS) / RIPPLE_MS) * maxDist;
-          const glowSpan = maxDist * AFTERGLOW;
-          for (let e = 0; e < edgeCount && seg < MAX_SEG; e++) {
-            const a = edgeA[e];
-            const b = edgeB[e];
-            const da = nodeDist[a];
-            const db = nodeDist[b];
-            if (da === Infinity && db === Infinity) continue;
-            // Anchor the link at the endpoint nearer the impact; extend outward.
-            const near = da <= db ? a : b;
-            const far = da <= db ? b : a;
-            const dNear = da <= db ? da : db;
-            const len = edgeLen[e];
-            if (front < dNear) continue; // ripple hasn't reached this link yet
-            const age = front - dNear - len; // <0 extending, ≥0 fully drawn
-            if (age > glowSpan) continue; // faded out
-            const grow = age < 0 ? (front - dNear) / len : 1;
+          const rt = elapsed - BEAM_MS;
+          const front = Math.min(rt / RIPPLE_MS, 1) * maxDist;
+          // Global fade: 1 while growing/holding, ramps to 0 during the fade.
+          let gf = 1;
+          if (rt > RIPPLE_MS + HOLD_MS) {
+            gf = 1 - (rt - RIPPLE_MS - HOLD_MS) / FADE_MS;
+            if (gf < 0) gf = 0;
+          }
+          for (let n = 0; n < count && seg < MAX_SEG; n++) {
+            const pe = nodePred[n];
+            if (pe < 0) continue; // source node or unreached
+            const parent = edgeA[pe] === n ? edgeB[pe] : edgeA[pe];
+            const dParent = nodeDist[parent];
+            if (front < dParent) continue; // branch hasn't reached the parent yet
+            const len = edgeLen[pe]; // = nodeDist[n] - dParent along the tree
+            const grow = Math.min((front - dParent) / len, 1); // parent → child
             wpNear
-              .set(positions[near * 3], positions[near * 3 + 1], positions[near * 3 + 2])
+              .set(positions[parent * 3], positions[parent * 3 + 1], positions[parent * 3 + 2])
               .applyMatrix4(group.matrixWorld);
             wpFar
-              .set(positions[far * 3], positions[far * 3 + 1], positions[far * 3 + 2])
+              .set(positions[n * 3], positions[n * 3 + 1], positions[n * 3 + 2])
               .applyMatrix4(group.matrixWorld);
             const tipX = wpNear.x + (wpFar.x - wpNear.x) * grow;
             const tipY = wpNear.y + (wpFar.y - wpNear.y) * grow;
             const tipZ = wpNear.z + (wpFar.z - wpNear.z) * grow;
-            const gl = age < 0 ? 0 : age / glowSpan; // 0 fresh → 1 faded
-            const sr = C_GLOW.r + (C_BG.r - C_GLOW.r) * gl;
-            const sg = C_GLOW.g + (C_BG.g - C_GLOW.g) * gl;
-            const sb = C_GLOW.b + (C_BG.b - C_GLOW.b) * gl;
-            const tr = age < 0 ? C_HEAD.r : sr;
-            const tg = age < 0 ? C_HEAD.g : sg;
-            const tb = age < 0 ? C_HEAD.b : sb;
+            // Parent end settled; the advancing tip glows brighter while growing.
+            const tipCol = grow < 1 ? C_HEAD : C_GLOW;
             const bo = depthBright(wpNear.z);
             const bt = depthBright(tipZ);
+            // depth-fade toward the still-visible C_FADE, then global gf → C_BG.
+            const nr = C_FADE.r + (C_GLOW.r - C_FADE.r) * bo;
+            const ng = C_FADE.g + (C_GLOW.g - C_FADE.g) * bo;
+            const nb = C_FADE.b + (C_GLOW.b - C_FADE.b) * bo;
+            const trr = C_FADE.r + (tipCol.r - C_FADE.r) * bt;
+            const tgg = C_FADE.g + (tipCol.g - C_FADE.g) * bt;
+            const tbb = C_FADE.b + (tipCol.b - C_FADE.b) * bt;
             seg = putSeg(
               seg,
               wpNear.x, wpNear.y, wpNear.z, tipX, tipY, tipZ,
-              C_FADE.r + (sr - C_FADE.r) * bo,
-              C_FADE.g + (sg - C_FADE.g) * bo,
-              C_FADE.b + (sb - C_FADE.b) * bo,
-              C_FADE.r + (tr - C_FADE.r) * bt,
-              C_FADE.g + (tg - C_FADE.g) * bt,
-              C_FADE.b + (tb - C_FADE.b) * bt,
+              C_BG.r + (nr - C_BG.r) * gf,
+              C_BG.g + (ng - C_BG.g) * gf,
+              C_BG.b + (nb - C_BG.b) * gf,
+              C_BG.r + (trr - C_BG.r) * gf,
+              C_BG.g + (tgg - C_BG.g) * gf,
+              C_BG.b + (tbb - C_BG.b) * gf,
             );
           }
         }
@@ -413,8 +422,8 @@ export function HeroCanvas() {
       group.rotation.y = spin + curX * 0.55;
       group.rotation.x = -curY * 0.4;
       if (pointerActive) {
-        // Re-emit once the previous shot (beam + ripple + afterglow) has faded.
-        if (!sourceValid || now - waveStart > BEAM_MS + RIPPLE_MS * (1 + AFTERGLOW) + 150)
+        // Re-emit once the previous shot (beam + grow + hold + fade) has ended.
+        if (!sourceValid || now - waveStart > BEAM_MS + RIPPLE_MS + HOLD_MS + FADE_MS + 120)
           emitFrom(now);
       } else {
         sourceValid = false;
