@@ -18,17 +18,27 @@ function makeDotTexture(): THREE.CanvasTexture {
   g.addColorStop(1, "rgba(255,255,255,0)");
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, size, size);
-  const tex = new THREE.CanvasTexture(canvas);
-  return tex;
+  return new THREE.CanvasTexture(canvas);
 }
 
 const PALETTE = [0x60a5fa, 0x818cf8, 0x22d3ee, 0xa78bfa];
 
+type Meteor = {
+  x: number;
+  y: number;
+  z: number;
+  dx: number;
+  dy: number;
+  dz: number;
+  speed: number;
+  len: number;
+  delay: number;
+};
+
 /**
- * Generated three.js particle field behind the hero — zero external assets
- * (no copyright), and interactive: the field parallax-tilts toward the pointer,
- * and light "signals" pulse outward from the node nearest the cursor along a
- * sparse comm-network, spreading far like fiber-optic transmission. Respects
+ * Generated three.js hero background — zero external assets (no copyright):
+ * a gently rotating particle field with meteors streaking in from outside and
+ * falling inward (down + into the screen). Not interactive. Respects
  * prefers-reduced-motion (static frame), pauses when scrolled out of view, and
  * cleans up fully.
  */
@@ -59,7 +69,8 @@ export function HeroCanvas() {
     });
     mount.appendChild(renderer.domElement);
 
-    const count = width < 640 ? 280 : 560;
+    // ── Ambient particle field (slowly rotating) ───────────────────────────
+    const count = width < 640 ? 260 : 520;
     const positions = new Float32Array(count * 3);
     const colors = new Float32Array(count * 3);
     const color = new THREE.Color();
@@ -75,30 +86,9 @@ export function HeroCanvas() {
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
     geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
-
-    // Interactive comm-network pulses: light signals race along a precomputed
-    // sparse graph, outward from the cursor. Buffers hold the currently-lit
-    // pulse segments; drawRange controls how many are live each frame.
-    const MAX_SEG = 600;
-    const linePositions = new Float32Array(MAX_SEG * 2 * 3);
-    const lineColors = new Float32Array(MAX_SEG * 2 * 3);
-    // Fat lines (LineSegments2) with world-unit thickness, so links get real
-    // 3D perspective — near links render thick, far links thin.
-    const lineGeometry = new LineSegmentsGeometry();
-    const lineMaterial = new LineMaterial({
-      vertexColors: true,
-      worldUnits: true,
-      linewidth: 0.22,
-      transparent: true,
-      opacity: 0.95,
-      depthTest: false,
-      depthWrite: false,
-    });
-    lineMaterial.resolution.set(width, height);
-
     const texture = makeDotTexture();
     const material = new THREE.PointsMaterial({
-      size: 0.55,
+      size: 0.5,
       map: texture,
       vertexColors: true,
       transparent: true,
@@ -107,305 +97,115 @@ export function HeroCanvas() {
       blending: THREE.AdditiveBlending,
       sizeAttenuation: true,
     });
-
     const group = new THREE.Group();
     group.add(new THREE.Points(geometry, material));
     scene.add(group);
 
-    // Pulse segments are computed in world space (endpoints ride the rotating
-    // field), so the LineSegments lives in the scene root, not the group.
-    const lineSegments = new LineSegments2(lineGeometry, lineMaterial);
-    lineSegments.frustumCulled = false;
-    scene.add(lineSegments);
+    // ── Meteors: fat-line streaks with world-unit thickness (3D perspective) ─
+    const METEORS = width < 640 ? 8 : 14;
+    const meteorPos = new Float32Array(METEORS * 2 * 3);
+    const meteorCol = new Float32Array(METEORS * 2 * 3);
+    const meteorGeo = new LineSegmentsGeometry();
+    const meteorMat = new LineMaterial({
+      vertexColors: true,
+      worldUnits: true,
+      linewidth: 0.18,
+      transparent: true,
+      opacity: 0.95,
+      depthTest: false,
+      depthWrite: false,
+    });
+    meteorMat.resolution.set(width, height);
+    const meteorLines = new LineSegments2(meteorGeo, meteorMat);
+    meteorLines.frustumCulled = false;
+    scene.add(meteorLines);
 
-    // Pointer state. ndc* is the pointer in normalized device coords (up = +1),
-    // used for the parallax tilt and to anchor the cursor lines.
-    let pointerActive = false;
-    let ndcX = 0;
-    let ndcY = 0;
-    let curX = 0;
-    let curY = 0;
-    let spin = 0;
+    const C_HEAD = new THREE.Color(0x0ea5e9); // bright meteor head (sky-500)
+    const C_TAIL = new THREE.Color(0xeaf2fb); // tail fades toward the light bg
+
+    // Depth cue: brighter/crisper when closer to the camera.
+    const camZ = camera.position.z;
+    const depthBright = (wz: number) => {
+      const f = (40 - (camZ - wz)) / 28;
+      return 0.5 + 0.5 * (f < 0 ? 0 : f > 1 ? 1 : f);
+    };
+
+    const spawn = (m: Meteor, delay: number) => {
+      m.x = (Math.random() - 0.5) * 66;
+      m.y = 20 + Math.random() * 16; // start above the top (outside)
+      m.z = (Math.random() - 0.5) * 22;
+      // Direction: down + slightly sideways + into the screen ("밖에서 안으로").
+      let dx = -0.32 - Math.random() * 0.16;
+      let dy = -1;
+      let dz = -0.16 - Math.random() * 0.22;
+      const L = Math.hypot(dx, dy, dz);
+      dx /= L;
+      dy /= L;
+      dz /= L;
+      m.dx = dx;
+      m.dy = dy;
+      m.dz = dz;
+      m.speed = 20 + Math.random() * 18;
+      m.len = 5 + Math.random() * 6;
+      m.delay = delay;
+    };
+
+    const meteors: Meteor[] = [];
+    for (let i = 0; i < METEORS; i++) {
+      const m: Meteor = { x: 0, y: 0, z: 0, dx: 0, dy: 0, dz: 0, speed: 0, len: 0, delay: 0 };
+      spawn(m, Math.random() * 1.4);
+      // Spread the initial shower along the fall path so some are already
+      // mid-flight and visible right away (respawns start above the top).
+      m.y = 34 - Math.random() * 54;
+      meteors.push(m);
+    }
+
     let rafId = 0;
     let visible = true;
+    let last = -1;
 
-    const onPointerMove = (e: PointerEvent) => {
-      const r = mount.getBoundingClientRect();
-      const inside =
-        e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
-      pointerActive = inside;
-      if (inside) {
-        ndcX = ((e.clientX - r.left) / r.width) * 2 - 1;
-        ndcY = -(((e.clientY - r.top) / r.height) * 2 - 1);
-      }
-    };
-    const onWinBlur = () => {
-      pointerActive = false;
-    };
-
-    // Scratch vectors reused each frame (no per-frame allocation).
-    const wp = new THREE.Vector3();
-    const wpNear = new THREE.Vector3();
-    const wpFar = new THREE.Vector3();
-
-    // ── Precomputed sparse comm-network ─────────────────────────────────────
-    // Each node links to its K nearest neighbours (deduped). Signals travel
-    // along these links — we deliberately don't connect everything.
-    const K = width < 640 ? 2 : 3;
-    const edgeA: number[] = [];
-    const edgeB: number[] = [];
-    const edgeLen: number[] = [];
-    {
-      const order = new Int32Array(count);
-      const d2 = new Float32Array(count);
-      const seenEdge = new Set<number>();
-      for (let i = 0; i < count; i++) {
-        for (let j = 0; j < count; j++) {
-          const dx = positions[i * 3] - positions[j * 3];
-          const dy = positions[i * 3 + 1] - positions[j * 3 + 1];
-          const dz = positions[i * 3 + 2] - positions[j * 3 + 2];
-          d2[j] = i === j ? Infinity : dx * dx + dy * dy + dz * dz;
-          order[j] = j;
-        }
-        for (let k = 0; k < K; k++) {
-          let mk = k;
-          for (let j = k + 1; j < count; j++) if (d2[order[j]] < d2[order[mk]]) mk = j;
-          const swap = order[k];
-          order[k] = order[mk];
-          order[mk] = swap;
-          const j = order[k];
-          const a = i < j ? i : j;
-          const b = i < j ? j : i;
-          const key = a * count + b;
-          if (!seenEdge.has(key)) {
-            seenEdge.add(key);
-            edgeA.push(a);
-            edgeB.push(b);
-            edgeLen.push(Math.sqrt(d2[j]));
-          }
-        }
-      }
-    }
-    const edgeCount = edgeA.length;
-    const adj: number[][] = Array.from({ length: count }, () => []);
-    for (let e = 0; e < edgeCount; e++) {
-      adj[edgeA[e]].push(e);
-      adj[edgeB[e]].push(e);
-    }
-
-    // Graph distance + predecessor edge from a source (Dijkstra, per shot). The
-    // predecessor edges form a shortest-path TREE we draw as growing branches.
-    const nodeDist = new Float32Array(count);
-    const nodeDone = new Uint8Array(count);
-    const nodePred = new Int32Array(count); // edge used to reach the node, -1 = none
-    const computeWave = (source: number) => {
-      nodeDist.fill(Infinity);
-      nodeDone.fill(0);
-      nodePred.fill(-1);
-      nodeDist[source] = 0;
-      for (let iter = 0; iter < count; iter++) {
-        let u = -1;
-        let best = Infinity;
-        for (let v = 0; v < count; v++) {
-          if (!nodeDone[v] && nodeDist[v] < best) {
-            best = nodeDist[v];
-            u = v;
-          }
-        }
-        if (u === -1) break;
-        nodeDone[u] = 1;
-        const list = adj[u];
-        for (let t = 0; t < list.length; t++) {
-          const e = list[t];
-          const nb = edgeA[e] === u ? edgeB[e] : edgeA[e];
-          const nd = nodeDist[u] + edgeLen[e];
-          if (nd < nodeDist[nb]) {
-            nodeDist[nb] = nd;
-            nodePred[nb] = e;
-          }
-        }
-      }
-    };
-
-    // Two-phase "shot": a straight beam fires from the outer side (large z,
-    // toward the camera) into the node nearest the cursor, then the impact
-    // ripples outward through the network to the other points.
-    const BEAM_MS = 420; // beam flight time to the impact node
-    const RIPPLE_MS = 1500; // time for branches to grow out to the farthest node
-    const HOLD_MS = 500; // fully-connected network held before it fades
-    const FADE_MS = 650; // whole network fades out together (stays connected)
-    const BEAM_OUT = 22; // how far out along +z the beam starts
-    const BEAM_UP = 7; // slight upward offset of the beam origin
-    const C_BEAM = new THREE.Color(0x0891b2); // bright incoming beam (cyan-600)
-    const C_HEAD = new THREE.Color(0x1d4ed8); // ripple advancing tip (blue-700)
-    const C_GLOW = new THREE.Color(0x3b82f6); // settled, freshly-lit link (blue-500)
-    const C_FADE = new THREE.Color(0x93c5fd); // depth-fade base — still visible (blue-300)
-    const C_BG = new THREE.Color(0xeaf2fb); // afterglow disappears toward this
-    let waveStart = 0;
-
-    // Depth cue: fade a line vertex toward the background by its distance from
-    // the camera, so the links read with real 3D perspective (near = crisp,
-    // far = washed out). Returns a brightness multiplier in [0.2, 1].
-    const camZ = camera.position.z;
-    const DEPTH_NEAR = 12;
-    const DEPTH_FAR = 40;
-    const depthBright = (wz: number) => {
-      const f = (DEPTH_FAR - (camZ - wz)) / (DEPTH_FAR - DEPTH_NEAR);
-      return 0.55 + 0.45 * (f < 0 ? 0 : f > 1 ? 1 : f);
-    };
-    let maxDist = 1; // max graph distance from the impact node (set per emit)
-    let sourceValid = false;
-    let srcIndex = 0; // impact node (nearest the cursor)
-    const impactPos = new THREE.Vector3(); // beam target (live), reused per frame
-    const anchorPos = new THREE.Vector3(); // beam origin (outer), reused per frame
-
-    // Pick the impact node nearest the cursor and compute graph distances for the
-    // ripple that spreads out from it.
-    const emitFrom = (now: number) => {
-      group.updateMatrixWorld(true);
-      const aspect = width / height;
-      let src = 0;
-      let bestD = Infinity;
-      for (let i = 0; i < count; i++) {
-        wp.set(positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2])
-          .applyMatrix4(group.matrixWorld)
-          .project(camera);
-        const d = Math.hypot((wp.x - ndcX) * aspect, wp.y - ndcY);
-        if (d < bestD) {
-          bestD = d;
-          src = i;
-        }
-      }
-      srcIndex = src;
-      computeWave(src);
-      let mx = 1;
-      for (let i = 0; i < count; i++) {
-        const dd = nodeDist[i];
-        if (dd !== Infinity && dd > mx) mx = dd;
-      }
-      maxDist = mx;
-      waveStart = now;
-      sourceValid = true;
-    };
-
-    // Write one segment (p0 → p1) with per-vertex colours into the buffers.
-    const putSeg = (
-      s: number,
-      x0: number, y0: number, z0: number,
-      x1: number, y1: number, z1: number,
-      r0: number, g0: number, b0: number,
-      r1: number, g1: number, b1: number,
-    ) => {
-      const o = s * 6;
-      linePositions[o] = x0;
-      linePositions[o + 1] = y0;
-      linePositions[o + 2] = z0;
-      linePositions[o + 3] = x1;
-      linePositions[o + 4] = y1;
-      linePositions[o + 5] = z1;
-      lineColors[o] = r0;
-      lineColors[o + 1] = g0;
-      lineColors[o + 2] = b0;
-      lineColors[o + 3] = r1;
-      lineColors[o + 4] = g1;
-      lineColors[o + 5] = b1;
-      return s + 1;
-    };
-
-    const updateLines = (now: number) => {
+    const drawMeteors = (dt: number) => {
       let seg = 0;
-      if (pointerActive && sourceValid) {
-        group.updateMatrixWorld(true);
-        const elapsed = now - waveStart;
-
-        // Impact node (live) and the outer anchor the beam is fired from.
-        impactPos
-          .set(positions[srcIndex * 3], positions[srcIndex * 3 + 1], positions[srcIndex * 3 + 2])
-          .applyMatrix4(group.matrixWorld);
-        anchorPos.set(impactPos.x, impactPos.y + BEAM_UP, impactPos.z + BEAM_OUT);
-
-        // ── Phase A: straight beam flies in from outer z to the impact node ──
-        if (elapsed < BEAM_MS) {
-          const p = elapsed / BEAM_MS;
-          const tail = Math.max(0, p - 0.4);
-          const dx = impactPos.x - anchorPos.x;
-          const dy = impactPos.y - anchorPos.y;
-          const dz = impactPos.z - anchorPos.z;
-          const hz = anchorPos.z + dz * p;
-          const tz = anchorPos.z + dz * tail;
-          const bh = depthBright(hz);
-          const btl = depthBright(tz) * 0.5;
-          seg = putSeg(
-            seg,
-            anchorPos.x + dx * tail, anchorPos.y + dy * tail, tz,
-            anchorPos.x + dx * p, anchorPos.y + dy * p, hz,
-            C_FADE.r + (C_BEAM.r - C_FADE.r) * btl,
-            C_FADE.g + (C_BEAM.g - C_FADE.g) * btl,
-            C_FADE.b + (C_BEAM.b - C_FADE.b) * btl,
-            C_FADE.r + (C_BEAM.r - C_FADE.r) * bh,
-            C_FADE.g + (C_BEAM.g - C_FADE.g) * bh,
-            C_FADE.b + (C_BEAM.b - C_FADE.b) * bh,
-          );
+      for (let i = 0; i < METEORS; i++) {
+        const m = meteors[i];
+        if (m.delay > 0) {
+          m.delay -= dt;
+          continue;
         }
-
-        // ── Phase B: branches grow out along the shortest-path tree and stay
-        // connected (parent → child), then the whole network fades together. ──
-        if (elapsed >= BEAM_MS) {
-          const rt = elapsed - BEAM_MS;
-          const front = Math.min(rt / RIPPLE_MS, 1) * maxDist;
-          // Global fade: 1 while growing/holding, ramps to 0 during the fade.
-          let gf = 1;
-          if (rt > RIPPLE_MS + HOLD_MS) {
-            gf = 1 - (rt - RIPPLE_MS - HOLD_MS) / FADE_MS;
-            if (gf < 0) gf = 0;
-          }
-          for (let n = 0; n < count && seg < MAX_SEG; n++) {
-            const pe = nodePred[n];
-            if (pe < 0) continue; // source node or unreached
-            const parent = edgeA[pe] === n ? edgeB[pe] : edgeA[pe];
-            const dParent = nodeDist[parent];
-            if (front < dParent) continue; // branch hasn't reached the parent yet
-            const len = edgeLen[pe]; // = nodeDist[n] - dParent along the tree
-            const grow = Math.min((front - dParent) / len, 1); // parent → child
-            wpNear
-              .set(positions[parent * 3], positions[parent * 3 + 1], positions[parent * 3 + 2])
-              .applyMatrix4(group.matrixWorld);
-            wpFar
-              .set(positions[n * 3], positions[n * 3 + 1], positions[n * 3 + 2])
-              .applyMatrix4(group.matrixWorld);
-            const tipX = wpNear.x + (wpFar.x - wpNear.x) * grow;
-            const tipY = wpNear.y + (wpFar.y - wpNear.y) * grow;
-            const tipZ = wpNear.z + (wpFar.z - wpNear.z) * grow;
-            // Parent end settled; the advancing tip glows brighter while growing.
-            const tipCol = grow < 1 ? C_HEAD : C_GLOW;
-            const bo = depthBright(wpNear.z);
-            const bt = depthBright(tipZ);
-            // depth-fade toward the still-visible C_FADE, then global gf → C_BG.
-            const nr = C_FADE.r + (C_GLOW.r - C_FADE.r) * bo;
-            const ng = C_FADE.g + (C_GLOW.g - C_FADE.g) * bo;
-            const nb = C_FADE.b + (C_GLOW.b - C_FADE.b) * bo;
-            const trr = C_FADE.r + (tipCol.r - C_FADE.r) * bt;
-            const tgg = C_FADE.g + (tipCol.g - C_FADE.g) * bt;
-            const tbb = C_FADE.b + (tipCol.b - C_FADE.b) * bt;
-            seg = putSeg(
-              seg,
-              wpNear.x, wpNear.y, wpNear.z, tipX, tipY, tipZ,
-              C_BG.r + (nr - C_BG.r) * gf,
-              C_BG.g + (ng - C_BG.g) * gf,
-              C_BG.b + (nb - C_BG.b) * gf,
-              C_BG.r + (trr - C_BG.r) * gf,
-              C_BG.g + (tgg - C_BG.g) * gf,
-              C_BG.b + (tbb - C_BG.b) * gf,
-            );
-          }
+        m.x += m.dx * m.speed * dt;
+        m.y += m.dy * m.speed * dt;
+        m.z += m.dz * m.speed * dt;
+        if (m.y < -22) {
+          spawn(m, Math.random() * 1.6);
+          continue;
         }
+        const tailX = m.x - m.dx * m.len;
+        const tailY = m.y - m.dy * m.len;
+        const tailZ = m.z - m.dz * m.len;
+        const bh = depthBright(m.z);
+        const o = seg * 6;
+        // tail vertex (faded → bg)
+        meteorPos[o] = tailX;
+        meteorPos[o + 1] = tailY;
+        meteorPos[o + 2] = tailZ;
+        meteorCol[o] = C_TAIL.r;
+        meteorCol[o + 1] = C_TAIL.g;
+        meteorCol[o + 2] = C_TAIL.b;
+        // head vertex (bright)
+        meteorPos[o + 3] = m.x;
+        meteorPos[o + 4] = m.y;
+        meteorPos[o + 5] = m.z;
+        meteorCol[o + 3] = C_TAIL.r + (C_HEAD.r - C_TAIL.r) * bh;
+        meteorCol[o + 4] = C_TAIL.g + (C_HEAD.g - C_TAIL.g) * bh;
+        meteorCol[o + 5] = C_TAIL.b + (C_HEAD.b - C_TAIL.b) * bh;
+        seg++;
       }
       if (seg === 0) {
-        lineSegments.visible = false;
+        meteorLines.visible = false;
       } else {
-        lineSegments.visible = true;
-        lineGeometry.setPositions(linePositions.subarray(0, seg * 6));
-        lineGeometry.setColors(lineColors.subarray(0, seg * 6));
+        meteorLines.visible = true;
+        meteorGeo.setPositions(meteorPos.subarray(0, seg * 6));
+        meteorGeo.setColors(meteorCol.subarray(0, seg * 6));
       }
     };
 
@@ -414,30 +214,24 @@ export function HeroCanvas() {
     const animate = (ts?: number) => {
       if (!visible) return;
       const now = ts ?? 0;
-      const tx = pointerActive ? ndcX : 0;
-      const ty = pointerActive ? ndcY : 0;
-      curX += (tx - curX) * 0.05;
-      curY += (ty - curY) * 0.05;
-      spin += 0.0006;
-      group.rotation.y = spin + curX * 0.55;
-      group.rotation.x = -curY * 0.4;
-      if (pointerActive) {
-        // Re-emit once the previous shot (beam + grow + hold + fade) has ended.
-        if (!sourceValid || now - waveStart > BEAM_MS + RIPPLE_MS + HOLD_MS + FADE_MS + 120)
-          emitFrom(now);
-      } else {
-        sourceValid = false;
-      }
-      updateLines(now);
+      if (last < 0) last = now;
+      const dt = Math.min((now - last) / 1000, 0.05); // clamp after tab throttling
+      last = now;
+      group.rotation.y += dt * 0.04;
+      drawMeteors(dt);
       render();
       rafId = requestAnimationFrame(animate);
     };
 
     if (reduce) {
+      // Static frame: place meteors mid-flight so there's something to see.
+      for (let i = 0; i < METEORS; i++) {
+        meteors[i].delay = 0;
+        meteors[i].y = (Math.random() - 0.5) * 24;
+      }
+      drawMeteors(0);
       render();
     } else {
-      window.addEventListener("pointermove", onPointerMove, { passive: true });
-      window.addEventListener("blur", onWinBlur);
       animate();
     }
 
@@ -445,6 +239,7 @@ export function HeroCanvas() {
       ([entry]) => {
         visible = entry.isIntersecting;
         if (visible && !reduce) {
+          last = -1;
           cancelAnimationFrame(rafId);
           animate();
         } else {
@@ -461,7 +256,7 @@ export function HeroCanvas() {
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
       renderer.setSize(width, height);
-      lineMaterial.resolution.set(width, height);
+      meteorMat.resolution.set(width, height);
       render();
     };
     window.addEventListener("resize", onResize);
@@ -470,12 +265,10 @@ export function HeroCanvas() {
       cancelAnimationFrame(rafId);
       io.disconnect();
       window.removeEventListener("resize", onResize);
-      window.removeEventListener("pointermove", onPointerMove);
-      window.removeEventListener("blur", onWinBlur);
       geometry.dispose();
       material.dispose();
-      lineGeometry.dispose();
-      lineMaterial.dispose();
+      meteorGeo.dispose();
+      meteorMat.dispose();
       texture.dispose();
       renderer.dispose();
       if (renderer.domElement.parentNode) {
