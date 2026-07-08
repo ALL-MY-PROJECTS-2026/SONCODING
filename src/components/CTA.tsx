@@ -7,8 +7,16 @@ export function CTA({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   return (
     <section className="py-16 sm:py-20">
       <Container>
-        <div className="reveal group relative overflow-hidden rounded-3xl bg-slate-950 px-6 py-14 text-center sm:px-16 sm:py-16">
+        <div className="reveal group relative overflow-hidden rounded-3xl bg-slate-950 px-6 py-14 text-center ring-1 ring-white/10 sm:px-16 sm:py-16">
           <div className="bg-grid pointer-events-none absolute inset-0 opacity-40" />
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -left-16 -top-24 h-72 w-72 rounded-full bg-blue-500/25 blur-3xl"
+          />
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -bottom-24 -right-12 h-72 w-72 rounded-full bg-indigo-500/20 blur-3xl"
+          />
           <div className="relative">
             <h2 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
               {dict.home.ctaTitle}

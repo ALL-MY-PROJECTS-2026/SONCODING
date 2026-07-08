@@ -229,3 +229,7 @@
 - 홈 주요 섹션(두 개의 축/왜 포켓코딩/후기) 제목이 밋밋한 중앙 h2뿐이라 template 느낌 → 제목 위에 **작은 컬러 uppercase eyebrow 라벨**(서비스·강점·후기 / What we do·Why us·Testimonials) 추가. 2026 SaaS 표준 위계 패턴.
 - i18n에 eyebrow 키(ko/en) 추가, 각 섹션에 blue-600 tracking-widest 라벨 렌더.
 - Chrome MCP로 실제 확인. 영향: 항목 1·4 (레이아웃·타이포 위계)
+
+### 회차 43 — CTA 글로우 & 링
+- 홈 CTA 다크 박스(무엇을 만들고 싶으신가요?)가 평면적이던 것 → 순수 CSS **블루/인디고 소프트 글로우 블롭 2개(blur-3xl) + ring-white/10** 추가로 야경 그라디언트 같은 깊이감. 저작권 무관·정적 export 호환·정적(모션 없음).
+- Chrome MCP로 실제 확인. 영향: 항목 3·5 (모던·색 깊이)
